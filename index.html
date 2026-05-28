@@ -352,12 +352,16 @@ async function startCamera(){
     video.srcObject=videoStream;
     await video.play();
     video.addEventListener('loadedmetadata',()=>{resizeOverlay();drawOverlay();},{once:true});
-    window.addEventListener('resize',()=>{resizeOverlay();drawOverlay();});
+    // Remove previous resize listener before adding new one
+    window.removeEventListener('resize', onResize);
+    window.addEventListener('resize', onResize);
     updateCameraUI();
   } catch(e){
     alert('Camera access denied. Please allow camera permission and reload.');
   }
 }
+
+function onResize(){ resizeOverlay(); drawOverlay(); }
 
 function resizeOverlay(){
   const c=document.getElementById('overlay-canvas');
@@ -365,19 +369,17 @@ function resizeOverlay(){
 }
 
 // Crop ratios: width% and height% of screen
-// Top front/back: square (w=h). Others: rectangular.
 const CROP_RATIO={
-  front: {w:0.72, h:0.72},  // square for top front (also used as base for bottom)
-  back:  {w:0.72, h:0.72},  // square for top back
+  front: {w:0.72, h:0.88},  // tall box — top front/back will crop square FROM WIDTH inside this
+  back:  {w:0.72, h:0.88},
   left:  {w:0.55, h:0.78},
   right: {w:0.55, h:0.78},
   detail:{w:0.85, h:0.48}
 };
 
-// For bottom front/back, use non-square ratio
 function getEffectiveCropRatio(angle){
   if(session.garmentType==='bottom' && (angle==='front'||angle==='back')){
-    return {w:0.72, h:0.85}; // taller for bottom garments
+    return {w:0.72, h:0.88};
   }
   return CROP_RATIO[angle]||CROP_RATIO.front;
 }
@@ -389,6 +391,15 @@ function getCropBox(angle){
   const bw=W*r.w, bh=H*r.h;
   const bx=(W-bw)/2, by=(H-bh)/2;
   return {x:bx, y:by, w:bw, h:bh};
+}
+
+// For top front/back: show a yellow square INSIDE the red box to show actual crop area
+function getSquareBox(cropBox){
+  // Square side = width of crop box, centered vertically
+  const side=cropBox.w;
+  const sx=cropBox.x;
+  const sy=cropBox.y+(cropBox.h-side)/2;
+  return {x:sx, y:sy, w:side, h:side};
 }
 
 // Preloaded silhouette images
@@ -456,6 +467,19 @@ function drawOverlay(){
     };
     if(img.complete && img.naturalWidth>0) drawSil();
     else img.onload=()=>{ resizeOverlay(); drawOverlay(); };
+  }
+
+  // Top front/back: yellow square shows actual crop area (width-based square, centered)
+  const isTopFB = session.garmentType==='top' && (shot.angle==='front'||shot.angle==='back');
+  if(isTopFB){
+    const sq=getSquareBox(box);
+    ctx.strokeStyle='#FFD700';
+    ctx.lineWidth=2.5;
+    ctx.setLineDash([8,4]);
+    ctx.strokeRect(sq.x, sq.y, sq.w, sq.h);
+    ctx.setLineDash([]);
+    ctx.fillStyle='rgba(255,215,0,0.05)';
+    ctx.fillRect(sq.x, sq.y, sq.w, sq.h);
   }
 }
 
@@ -540,17 +564,15 @@ function confirmCrop(){
   const {iX,iY,iW,iH,img}=document.getElementById('crop-canvas')._crop;
   const out=document.createElement('canvas');
 
-  // Top front/back: force true square from center of crop region
-  const isTopSquare = session.garmentType==='top' && (pendingShot.angle==='front'||pendingShot.angle==='back');
+  const isTopFB = session.garmentType==='top' && (pendingShot.angle==='front'||pendingShot.angle==='back');
   let srcX=iX, srcY=iY, srcW=iW, srcH=iH;
-  if(isTopSquare){
-    // Use the width as the square side (crop box is already square-ish, but image coords may differ slightly)
-    // Take the smaller dimension and center the crop
-    const side=Math.min(iW,iH);
-    srcX=iX+(iW-side)/2;
-    srcY=iY+(iH-side)/2;
-    srcW=side;
-    srcH=side;
+
+  if(isTopFB){
+    // Square crop: use width as side, center vertically within crop region
+    srcW=iW;
+    srcH=iW; // force square by width
+    srcX=iX;
+    srcY=iY+(iH-srcH)/2; // center vertically
   }
 
   out.width=Math.round(srcW);

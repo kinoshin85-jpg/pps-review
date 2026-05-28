@@ -156,7 +156,8 @@ input::placeholder { color: var(--dim); }
     <div class="hero">
       <div class="hero-brand">ARITZIA</div>
       <div class="hero-title">PPS Review Record</div>
-      <div class="hero-sub">Hansoll Vina</div>
+      <div class="hero-sub">Hansoll Textile</div>
+      <div style="margin-top:14px;font-size:13px;color:#555;font-style:italic;letter-spacing:1px;">Kino Shin</div>
     </div>
     <button class="btn-primary" onclick="goTo('setup-screen')">+ New Session</button>
   </div>
@@ -364,18 +365,27 @@ function resizeOverlay(){
 }
 
 // Crop ratios: width% and height% of screen
+// Top front/back: square (w=h). Others: rectangular.
 const CROP_RATIO={
-  front: {w:0.72, h:0.78},
-  back:  {w:0.72, h:0.78},
+  front: {w:0.72, h:0.72},  // square for top front (also used as base for bottom)
+  back:  {w:0.72, h:0.72},  // square for top back
   left:  {w:0.55, h:0.78},
   right: {w:0.55, h:0.78},
   detail:{w:0.85, h:0.48}
 };
 
+// For bottom front/back, use non-square ratio
+function getEffectiveCropRatio(angle){
+  if(session.garmentType==='bottom' && (angle==='front'||angle==='back')){
+    return {w:0.72, h:0.85}; // taller for bottom garments
+  }
+  return CROP_RATIO[angle]||CROP_RATIO.front;
+}
+
 function getCropBox(angle){
   const c=document.getElementById('overlay-canvas');
   const W=c.width, H=c.height;
-  const r=CROP_RATIO[angle]||CROP_RATIO.front;
+  const r=getEffectiveCropRatio(angle);
   const bw=W*r.w, bh=H*r.h;
   const bx=(W-bw)/2, by=(H-bh)/2;
   return {x:bx, y:by, w:bw, h:bh};
@@ -490,7 +500,7 @@ function showCropModal(){
     ctx.drawImage(img,0,0,canvas.width,canvas.height);
 
     // Map crop box from screen to image coords
-    const r=CROP_RATIO[pendingShot.angle]||CROP_RATIO.front;
+    const r=getEffectiveCropRatio(pendingShot.angle);
     const sW=window.innerWidth, sH=window.innerHeight;
     const cropSW=sW*r.w, cropSH=sH*r.h;
     const cropSX=(sW-cropSW)/2, cropSY=(sH-cropSH)/2;
@@ -528,8 +538,19 @@ function confirmCrop(){
   document.getElementById('crop-modal').classList.remove('active');
   const {iX,iY,iW,iH,img}=document.getElementById('crop-canvas')._crop;
   const out=document.createElement('canvas');
-  out.width=Math.round(iW); out.height=Math.round(iH);
-  out.getContext('2d').drawImage(img,iX,iY,iW,iH,0,0,out.width,out.height);
+
+  // Top front/back: force square crop (take the shorter side, center the other)
+  const isTopSquare = session.garmentType==='top' && (pendingShot.angle==='front'||pendingShot.angle==='back');
+  let srcX=iX, srcY=iY, srcW=iW, srcH=iH;
+  if(isTopSquare){
+    const side=Math.min(iW,iH);
+    srcX=iX+(iW-side)/2;
+    srcY=iY+(iH-side)/2;
+    srcW=side; srcH=side;
+  }
+
+  out.width=Math.round(srcW); out.height=Math.round(srcH);
+  out.getContext('2d').drawImage(img,srcX,srcY,srcW,srcH,0,0,out.width,out.height);
   const key=shotKey(pendingShot.angle,pendingShot.ppsType,pendingShot.detailIndex);
   session.photos[key]=out.toDataURL('image/jpeg',0.90);
   pendingShot=null; capturedDataURL=null;
@@ -646,7 +667,7 @@ async function doExport(){
     // mailto
     if(email){
       setTimeout(()=>{
-        window.location.href=`mailto:${email}?subject=PPS Review Record — ${encodeURIComponent(session.styleNumber)}&body=Please find the attached PPS Review Record for style ${encodeURIComponent(session.styleNumber)}.%0A%0AHansoll Vina`;
+        window.location.href=`mailto:${email}?subject=PPS Review Record — ${encodeURIComponent(session.styleNumber)}&body=Please find the attached PPS Review Record for style ${encodeURIComponent(session.styleNumber)}.%0A%0AHansoll Textile`;
       },1200);
     }
 
@@ -675,10 +696,10 @@ async function generatePPT(){
   ts.addText('ARITZIA',{x:0,y:2.1,w:SW,h:0.4,align:'center',fontSize:13,color:'888888',charSpacing:8});
   ts.addText('PPS Review Record',{x:0,y:2.7,w:SW,h:0.7,align:'center',fontSize:30,bold:true,color:'FFFFFF'});
   ts.addText(session.styleNumber,{x:0,y:3.55,w:SW,h:0.5,align:'center',fontSize:18,bold:true,color:'e63946',charSpacing:2});
-  ts.addText('Hansoll Vina',{x:0,y:4.15,w:SW,h:0.4,align:'center',fontSize:13,color:'666666',charSpacing:4});
+  ts.addText('Hansoll Textile',{x:0,y:4.15,w:SW,h:0.4,align:'center',fontSize:13,color:'666666',charSpacing:4});
   ts.addText('© 2026 Kino Shin. All rights reserved.',{x:0,y:SH-0.4,w:SW,h:0.3,align:'center',fontSize:9,color:'444444'});
 
-  async function addSlide(title, lPhotos, rPhotos){
+  async function addSlide(title, lPhotos, rPhotos, slideAngle){
     const sl=prs.addSlide();
     sl.background={color:'FFFFFF'};
     sl.addText(title,{x:LX,y:0.22,w:SW-LX*2,h:0.44,fontSize:20,bold:true,color:'222222',underline:{style:'sng',color:'222222'}});
@@ -686,11 +707,31 @@ async function generatePPT(){
     sl.addText('• PPS keep in Vendor',{x:RX,y:0.74,w:RW,h:0.28,fontSize:13,color:'2a1a4e'});
     const imgY=1.1, imgH=SH-imgY-0.15;
 
+    // Top front/back: square image → place as square centered in column
+    // Bottom front/back: contain (preserve ratio)
+    // Side: contain
+    const isTopFrontBack = session.garmentType==='top' && (slideAngle==='front'||slideAngle==='back');
+    const isBottomFrontBack = session.garmentType==='bottom' && (slideAngle==='front'||slideAngle==='back');
+
     async function col(photos,cx,cw){
       if(photos.length===1){
-        if(photos[0]) sl.addImage({data:photos[0],x:cx,y:imgY,w:cw,h:imgH,sizing:{type:'contain',w:cw,h:imgH}});
-        else{sl.addShape(prs.ShapeType.rect,{x:cx,y:imgY,w:cw,h:imgH,fill:{color:'F0F0F0'},line:{color:'CCCCCC',width:0.5}});sl.addText('Photo Missing',{x:cx,y:imgY+imgH/2-0.2,w:cw,h:0.4,align:'center',color:'AAAAAA',fontSize:12});}
+        if(photos[0]){
+          if(isTopFrontBack){
+            // Square: fit as square centered in column area
+            const side=Math.min(cw,imgH);
+            const ox=cx+(cw-side)/2;
+            const oy=imgY+(imgH-side)/2;
+            sl.addImage({data:photos[0],x:ox,y:oy,w:side,h:side});
+          } else {
+            // contain (preserve ratio)
+            sl.addImage({data:photos[0],x:cx,y:imgY,w:cw,h:imgH,sizing:{type:'contain',w:cw,h:imgH}});
+          }
+        } else {
+          sl.addShape(prs.ShapeType.rect,{x:cx,y:imgY,w:cw,h:imgH,fill:{color:'F0F0F0'},line:{color:'CCCCCC',width:0.5}});
+          sl.addText('Photo Missing',{x:cx,y:imgY+imgH/2-0.2,w:cw,h:0.4,align:'center',color:'AAAAAA',fontSize:12});
+        }
       } else {
+        // Side view: 2 photos
         const sw=(cw-0.1)/2;
         for(let i=0;i<2;i++){
           const x=cx+i*(sw+0.1);
@@ -703,11 +744,11 @@ async function generatePPT(){
     await col(rPhotos,RX,RW);
   }
 
-  await addSlide('Garment Front View',[getP('front','vso',null)],[getP('front','vendor',null)]);
-  await addSlide('Garment Side View',[getP('left','vso',null),getP('right','vso',null)],[getP('left','vendor',null),getP('right','vendor',null)]);
-  await addSlide('Garment Back View',[getP('back','vso',null)],[getP('back','vendor',null)]);
+  await addSlide('Garment Front View',[getP('front','vso',null)],[getP('front','vendor',null)],'front');
+  await addSlide('Garment Side View',[getP('left','vso',null),getP('right','vso',null)],[getP('left','vendor',null),getP('right','vendor',null)],'left');
+  await addSlide('Garment Back View',[getP('back','vso',null)],[getP('back','vendor',null)],'back');
   for(let i=0;i<session.detailCount;i++){
-    await addSlide('Garment Special Details Highlight',[getP('detail','vso',i)],[getP('detail','vendor',i)]);
+    await addSlide('Garment Special Details Highlight',[getP('detail','vso',i)],[getP('detail','vendor',i)],'detail');
   }
 
   const safe=session.styleNumber.replace(/[^\w\-]/g,'_');

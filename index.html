@@ -516,40 +516,43 @@ function showCropModal(){
   const ctx=canvas.getContext('2d');
   const img=new Image();
   img.onload=()=>{
-    // Scale to fit screen width with margin
-    const maxW=window.innerWidth-24;
-    const scale=Math.min(maxW/img.width, window.innerHeight*0.72/img.height);
-    canvas.width=Math.round(img.width*scale);
-    canvas.height=Math.round(img.height*scale);
-    ctx.drawImage(img,0,0,canvas.width,canvas.height);
-
     // Map crop box from screen to image coords
     const r=getEffectiveCropRatio(pendingShot.angle);
     const sW=window.innerWidth, sH=window.innerHeight;
     const cropSW=sW*r.w, cropSH=sH*r.h;
     const cropSX=(sW-cropSW)/2, cropSY=(sH-cropSH)/2;
 
-    // Video fill mapping
+    // Video fill mapping (object-fit: cover)
     const vidAsp=img.width/img.height, scrAsp=sW/sH;
     let scX,scY,offX=0,offY=0;
     if(vidAsp>scrAsp){ scY=sH/img.height; scX=scY; offX=(sW-img.width*scX)/2; }
     else { scX=sW/img.width; scY=scX; offY=(sH-img.height*scY)/2; }
 
-    const iX=(cropSX-offX)/scX, iY=(cropSY-offY)/scY;
-    const iW=cropSW/scX, iH=cropSH/scY;
-    const px=iX*scale, py=iY*scale, pw=iW*scale, ph=iH*scale;
+    let iX=(cropSX-offX)/scX, iY=(cropSY-offY)/scY;
+    let iW=cropSW/scX, iH=cropSH/scY;
 
-    // Dim + box
-    ctx.fillStyle='rgba(0,0,0,0.45)';
-    ctx.fillRect(0,0,canvas.width,py);
-    ctx.fillRect(0,py,px,ph);
-    ctx.fillRect(px+pw,py,canvas.width-px-pw,ph);
-    ctx.fillRect(0,py+ph,canvas.width,canvas.height-py-ph);
-    ctx.strokeStyle='#e63946'; ctx.lineWidth=2; ctx.setLineDash([8,5]);
-    ctx.strokeRect(px,py,pw,ph); ctx.setLineDash([]);
+    // Top front/back: square crop — width as side, centered vertically
+    const isTopFB = session.garmentType==='top' && (pendingShot.angle==='front'||pendingShot.angle==='back');
+    if(isTopFB){
+      const side=iW;
+      iY=iY+(iH-side)/2;
+      iH=side;
+    }
+
+    // Clamp to image bounds
+    iX=Math.max(0,iX); iY=Math.max(0,iY);
+    iW=Math.min(iW, img.width-iX);
+    iH=Math.min(iH, img.height-iY);
+
+    // Show ONLY the cropped region on canvas
+    const maxW=window.innerWidth-32;
+    const maxH=window.innerHeight*0.68;
+    const scale=Math.min(maxW/iW, maxH/iH);
+    canvas.width=Math.round(iW*scale);
+    canvas.height=Math.round(iH*scale);
+    ctx.drawImage(img, iX, iY, iW, iH, 0, 0, canvas.width, canvas.height);
 
     canvas._crop={iX,iY,iW,iH,img};
-    console.log(`Crop coords: iX=${iX.toFixed(0)} iY=${iY.toFixed(0)} iW=${iW.toFixed(0)} iH=${iH.toFixed(0)} angle=${pendingShot.angle} garment=${session.garmentType}`);
   };
   img.src=capturedDataURL;
 }
@@ -562,22 +565,11 @@ function retakePhoto(){
 function confirmCrop(){
   document.getElementById('crop-modal').classList.remove('active');
   const {iX,iY,iW,iH,img}=document.getElementById('crop-canvas')._crop;
+  // _crop already has correct coords (square for top FB, full box for others)
   const out=document.createElement('canvas');
-
-  const isTopFB = session.garmentType==='top' && (pendingShot.angle==='front'||pendingShot.angle==='back');
-  let srcX=iX, srcY=iY, srcW=iW, srcH=iH;
-
-  if(isTopFB){
-    // Square crop: use width as side, center vertically within crop region
-    srcW=iW;
-    srcH=iW; // force square by width
-    srcX=iX;
-    srcY=iY+(iH-srcH)/2; // center vertically
-  }
-
-  out.width=Math.round(srcW);
-  out.height=Math.round(srcH);
-  out.getContext('2d').drawImage(img, srcX, srcY, srcW, srcH, 0, 0, out.width, out.height);
+  out.width=Math.round(iW);
+  out.height=Math.round(iH);
+  out.getContext('2d').drawImage(img, iX, iY, iW, iH, 0, 0, out.width, out.height);
   const key=shotKey(pendingShot.angle,pendingShot.ppsType,pendingShot.detailIndex);
   session.photos[key]=out.toDataURL('image/jpeg',0.90);
   pendingShot=null; capturedDataURL=null;
@@ -734,20 +726,26 @@ async function generatePPT(){
     sl.addText('• PPS keep in Vendor',{x:RX,y:0.74,w:RW,h:0.28,fontSize:13,color:'2a1a4e'});
     const imgY=1.1, imgH=SH-imgY-0.15;
 
-    // Top front/back: already square photo → place as square centered
-    const isTopFB = session.garmentType==='top' && (slideAngle==='front'||slideAngle==='back');
+    // Top front/back: square photo → square centered
+    // Bottom front/back: as-is (no resizing, original ratio)
+    // Side: contain
+    const isTopFB   = session.garmentType==='top'    && (slideAngle==='front'||slideAngle==='back');
+    const isBottomFB= session.garmentType==='bottom' && (slideAngle==='front'||slideAngle==='back');
 
     async function col(photos,cx,cw){
       if(photos.length===1){
         if(photos[0]){
           if(isTopFB){
-            // Square photo: fit as square, centered in column
+            // Square: centered in column
             const side=Math.min(cw,imgH);
             const ox=cx+(cw-side)/2;
             const oy=imgY+(imgH-side)/2;
             sl.addImage({data:photos[0],x:ox,y:oy,w:side,h:side});
+          } else if(isBottomFB){
+            // Original ratio, no forced sizing — fit within column preserving ratio
+            sl.addImage({data:photos[0],x:cx,y:imgY,w:cw,h:imgH,sizing:{type:'contain',w:cw,h:imgH}});
           } else {
-            // All others: contain (preserve ratio)
+            // Detail, side (single): contain
             sl.addImage({data:photos[0],x:cx,y:imgY,w:cw,h:imgH,sizing:{type:'contain',w:cw,h:imgH}});
           }
         } else {
@@ -755,7 +753,7 @@ async function generatePPT(){
           sl.addText('Photo Missing',{x:cx,y:imgY+imgH/2-0.2,w:cw,h:0.4,align:'center',color:'AAAAAA',fontSize:12});
         }
       } else {
-        // Side view: always 2 photos, always contain
+        // Side view: 2 photos, contain
         const sw=(cw-0.1)/2;
         for(let i=0;i<2;i++){
           const x=cx+i*(sw+0.1);

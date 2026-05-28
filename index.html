@@ -10,244 +10,147 @@
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
 <script src="silhouettes.js"></script>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --red: #e63946;
-    --dark: #1a1a2e;
-    --dark2: #0f0f1a;
-    --card: #1e1e30;
-    --border: #2a2a3e;
-    --text: #ffffff;
-    --muted: #aaaaaa;
-    --dim: #666666;
-  }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: var(--dark2);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-  .screen { display: none; min-height: 100vh; flex-direction: column; }
-  .screen.active { display: flex; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --red: #e63946; --dark: #1a1a2e; --dark2: #0f0f1a;
+  --card: #1e1e30; --border: #2a2a3e;
+  --text: #ffffff; --muted: #aaaaaa; --dim: #666666;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--dark2); color: var(--text);
+  min-height: 100vh; overflow-x: hidden;
+}
+.screen { display: none; min-height: 100vh; flex-direction: column; }
+.screen.active { display: flex; }
 
-  /* ── NAV BAR ── */
-  .navbar {
-    background: var(--dark);
-    padding: 14px 20px;
-    display: flex; align-items: center; justify-content: space-between;
-    position: sticky; top: 0; z-index: 100;
-    border-bottom: 1px solid var(--border);
-  }
-  .navbar-title { font-size: 17px; font-weight: 700; }
-  .navbar-back {
-    background: none; border: none; color: var(--red);
-    font-size: 16px; cursor: pointer; padding: 4px 8px;
-  }
+.navbar {
+  background: var(--dark); padding: 14px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+  border-bottom: 1px solid var(--border);
+}
+.navbar-title { font-size: 17px; font-weight: 700; }
+.navbar-back { background: none; border: none; color: var(--red); font-size: 16px; cursor: pointer; padding: 4px 8px; }
 
-  /* ── CONTENT ── */
-  .content { padding: 24px 20px; flex: 1; overflow-y: auto; padding-bottom: 100px; }
+.content { padding: 24px 20px; flex: 1; overflow-y: auto; padding-bottom: 120px; }
+.hero { text-align: center; padding: 60px 0 40px; }
+.hero-brand { font-size: 12px; letter-spacing: 6px; color: var(--dim); margin-bottom: 16px; }
+.hero-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.hero-sub { font-size: 14px; color: var(--muted); letter-spacing: 2px; }
+.footer-copy { text-align: center; color: #333; font-size: 11px; padding: 20px; }
 
-  /* ── HOME ── */
-  .hero { text-align: center; padding: 60px 0 40px; }
-  .hero-brand { font-size: 12px; letter-spacing: 6px; color: var(--dim); margin-bottom: 16px; }
-  .hero-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
-  .hero-sub { font-size: 14px; color: var(--muted); letter-spacing: 2px; }
-  .footer-copy { text-align: center; color: #333; font-size: 11px; padding: 20px; }
+.btn-primary {
+  display: block; width: 100%; background: var(--red);
+  color: #fff; border: none; border-radius: 12px;
+  padding: 18px; font-size: 17px; font-weight: 700;
+  cursor: pointer; text-align: center;
+}
+.btn-secondary {
+  display: block; width: 100%; background: var(--card);
+  color: var(--muted); border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px; font-size: 15px;
+  cursor: pointer; text-align: center; margin-top: 12px;
+}
+.btn-primary:active { opacity: 0.85; }
+.btn-secondary:active { opacity: 0.7; }
 
-  /* ── BUTTONS ── */
-  .btn-primary {
-    display: block; width: 100%; background: var(--red);
-    color: #fff; border: none; border-radius: 12px;
-    padding: 18px; font-size: 17px; font-weight: 700;
-    cursor: pointer; text-align: center;
-  }
-  .btn-secondary {
-    display: block; width: 100%; background: var(--card);
-    color: var(--muted); border: 1px solid var(--border);
-    border-radius: 12px; padding: 16px; font-size: 15px;
-    cursor: pointer; text-align: center; margin-top: 12px;
-  }
-  .btn-primary:active { opacity: 0.85; }
-  .btn-secondary:active { opacity: 0.7; }
+.section { margin-bottom: 28px; }
+.label { font-size: 15px; font-weight: 700; margin-bottom: 10px; display: block; }
+.sublabel { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+input[type=text], input[type=email] {
+  width: 100%; background: var(--card); color: var(--text);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 14px 16px; font-size: 15px;
+}
+input::placeholder { color: var(--dim); }
 
-  /* ── FORM ── */
-  .section { margin-bottom: 28px; }
-  .label { font-size: 15px; font-weight: 700; margin-bottom: 10px; display: block; }
-  .sublabel { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
-  input[type=text], input[type=email] {
-    width: 100%; background: var(--card); color: var(--text);
-    border: 1px solid var(--border); border-radius: 10px;
-    padding: 14px 16px; font-size: 15px;
-  }
-  input::placeholder { color: var(--dim); }
+.toggle-row { display: flex; gap: 12px; }
+.toggle-btn {
+  flex: 1; background: var(--card); color: var(--muted);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 16px; font-size: 15px; font-weight: 600;
+  cursor: pointer; text-align: center;
+}
+.toggle-btn.active { background: var(--red); border-color: var(--red); color: #fff; }
 
-  /* ── TOGGLE ── */
-  .toggle-row { display: flex; gap: 12px; }
-  .toggle-btn {
-    flex: 1; background: var(--card); color: var(--muted);
-    border: 1px solid var(--border); border-radius: 10px;
-    padding: 16px; font-size: 15px; font-weight: 600;
-    cursor: pointer; text-align: center;
-  }
-  .toggle-btn.active { background: var(--red); border-color: var(--red); color: #fff; }
+.counter-row { display: flex; align-items: center; gap: 24px; margin-top: 4px; }
+.counter-btn {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 50%; width: 52px; height: 52px;
+  font-size: 22px; color: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.counter-val { font-size: 32px; font-weight: 700; min-width: 40px; text-align: center; }
 
-  /* ── COUNTER ── */
-  .counter-row { display: flex; align-items: center; gap: 24px; margin-top: 4px; }
-  .counter-btn {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 50%; width: 52px; height: 52px;
-    font-size: 22px; color: #fff; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .counter-val { font-size: 32px; font-weight: 700; min-width: 40px; text-align: center; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px; }
+.card-title { color: var(--red); font-weight: 700; font-size: 12px; letter-spacing: 1px; margin-bottom: 10px; }
+.card-line { color: #ccc; font-size: 14px; margin-bottom: 5px; }
 
-  /* ── SUMMARY CARD ── */
-  .card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 12px; padding: 16px; margin-bottom: 20px;
-  }
-  .card-title { color: var(--red); font-weight: 700; font-size: 12px; letter-spacing: 1px; margin-bottom: 10px; }
-  .card-line { color: #ccc; font-size: 14px; margin-bottom: 5px; }
+.warning { background: #3a1a00; border-left: 4px solid #ff6b35; border-radius: 8px; padding: 12px; margin-bottom: 16px; color: #ff6b35; font-size: 13px; }
 
-  /* ── WARNING ── */
-  .warning {
-    background: #3a1a00; border-left: 4px solid #ff6b35;
-    border-radius: 8px; padding: 12px; margin-bottom: 16px;
-    color: #ff6b35; font-size: 13px;
-  }
+/* CAMERA */
+#camera-screen { background: #000; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200; }
+#video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+#overlay-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
 
-  /* ── CAMERA SCREEN ── */
-  #camera-screen {
-    background: #000; position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    z-index: 200;
-  }
-  #video {
-    position: absolute; top: 0; left: 0;
-    width: 100%; height: 100%;
-    object-fit: cover;
-  }
-  #overlay-canvas {
-    position: absolute; top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-  }
-  .cam-top {
-    position: absolute; top: 0; left: 0; right: 0;
-    padding: 48px 20px 12px;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.75), transparent);
-    z-index: 10;
-  }
-  .cam-badge {
-    display: inline-block; background: var(--red);
-    border-radius: 6px; padding: 4px 10px;
-    font-size: 12px; font-weight: 700; margin-bottom: 6px;
-  }
-  .cam-angle { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
-  .progress-bar {
-    height: 4px; background: #333; border-radius: 2px; margin-bottom: 6px;
-  }
-  .progress-fill { height: 4px; background: var(--red); border-radius: 2px; transition: width 0.3s; }
-  .progress-text { font-size: 12px; color: var(--muted); }
-  .cam-bottom {
-    position: absolute; bottom: 0; left: 0; right: 0;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 20px 32px 48px;
-    background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
-    z-index: 10;
-  }
-  .shutter-btn {
-    width: 72px; height: 72px; border-radius: 50%;
-    border: 4px solid #fff; background: none;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-  }
-  .shutter-inner {
-    width: 54px; height: 54px; border-radius: 50%; background: #fff;
-  }
-  .cam-skip {
-    background: none; border: none; color: var(--muted);
-    font-size: 14px; cursor: pointer; width: 60px;
-  }
-  .cam-spacer { width: 60px; }
+.cam-top {
+  position: absolute; top: 0; left: 0; right: 0;
+  padding: 52px 20px 12px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+  z-index: 10;
+}
+.cam-badge { display: inline-block; background: var(--red); border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 700; margin-bottom: 6px; }
+.cam-angle { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+.progress-bar { height: 4px; background: #333; border-radius: 2px; margin-bottom: 6px; }
+.progress-fill { height: 4px; background: var(--red); border-radius: 2px; transition: width 0.3s; }
+.progress-text { font-size: 12px; color: var(--muted); }
 
-  /* ── REVIEW GRID ── */
-  .review-group { margin-bottom: 24px; }
-  .review-group-title {
-    color: #fff; font-weight: 700; font-size: 15px;
-    padding-bottom: 6px; margin-bottom: 10px;
-    border-bottom: 1px solid var(--border);
-  }
-  .thumb-row { display: flex; gap: 12px; }
-  .thumb-card { flex: 1; cursor: pointer; }
-  .thumb-img {
-    width: 100%; aspect-ratio: 3/4;
-    object-fit: cover; border-radius: 8px;
-    background: var(--card); display: block;
-  }
-  .thumb-empty {
-    width: 100%; aspect-ratio: 3/4;
-    background: var(--card);
-    border: 2px dashed var(--border);
-    border-radius: 8px;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    color: var(--dim); font-size: 12px; gap: 6px;
-  }
-  .pps-tag {
-    display: inline-block; border-radius: 4px;
-    padding: 3px 8px; margin-top: 6px;
-    font-size: 10px; font-weight: 700; color: #fff;
-  }
-  .tag-vso { background: #1a3a6e; }
-  .tag-vendor { background: #2a1a4e; }
-  .retake-hint { color: #444; font-size: 10px; margin-top: 3px; }
+.cam-bottom {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 32px 52px;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+  z-index: 10;
+}
+.shutter-btn { width: 72px; height: 72px; border-radius: 50%; border: 4px solid #fff; background: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.shutter-inner { width: 54px; height: 54px; border-radius: 50%; background: #fff; }
+.cam-skip { background: none; border: none; color: var(--muted); font-size: 14px; cursor: pointer; width: 60px; }
+.cam-spacer { width: 60px; }
 
-  /* ── FIXED FOOTER ── */
-  .fixed-footer {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    padding: 16px 20px; background: var(--dark2);
-    border-top: 1px solid var(--border); z-index: 50;
-  }
+/* REVIEW */
+.review-group { margin-bottom: 24px; }
+.review-group-title { color: #fff; font-weight: 700; font-size: 15px; padding-bottom: 6px; margin-bottom: 10px; border-bottom: 1px solid var(--border); }
+.thumb-row { display: flex; gap: 12px; }
+.thumb-card { flex: 1; cursor: pointer; }
+.thumb-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 8px; background: var(--card); display: block; }
+.thumb-empty { width: 100%; aspect-ratio: 3/4; background: var(--card); border: 2px dashed var(--border); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--dim); font-size: 12px; gap: 6px; }
+.pps-tag { display: inline-block; border-radius: 4px; padding: 3px 8px; margin-top: 6px; font-size: 10px; font-weight: 700; color: #fff; }
+.tag-vso { background: #1a3a6e; }
+.tag-vendor { background: #2a1a4e; }
+.retake-hint { color: #444; font-size: 10px; margin-top: 3px; }
 
-  /* ── EXPORT ── */
-  .status-box {
-    background: #0a2a1a; border: 1px solid #1a5a2a;
-    border-radius: 8px; padding: 12px; margin-bottom: 16px;
-    color: #4caf50; font-size: 13px;
-  }
-  .note { color: var(--dim); font-size: 12px; line-height: 18px; text-align: center; margin-bottom: 24px; }
+.fixed-footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 16px 20px; background: var(--dark2); border-top: 1px solid var(--border); z-index: 50; }
 
-  /* ── PHOTO CROP MODAL ── */
-  #crop-modal {
-    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.95); z-index: 300;
-    flex-direction: column; align-items: center; justify-content: center;
-  }
-  #crop-modal.active { display: flex; }
-  #crop-canvas { max-width: 100%; max-height: 70vh; cursor: crosshair; }
-  .crop-controls {
-    display: flex; gap: 12px; padding: 16px 20px;
-    width: 100%; justify-content: center;
-  }
-  .crop-confirm {
-    background: var(--red); color: #fff; border: none;
-    border-radius: 10px; padding: 14px 32px;
-    font-size: 16px; font-weight: 700; cursor: pointer;
-  }
-  .crop-retake {
-    background: var(--card); color: var(--muted);
-    border: 1px solid var(--border);
-    border-radius: 10px; padding: 14px 24px;
-    font-size: 15px; cursor: pointer;
-  }
-  .crop-hint { color: var(--muted); font-size: 12px; padding-top: 8px; text-align: center; }
+/* CROP MODAL */
+#crop-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.96); z-index: 300; flex-direction: column; align-items: center; justify-content: center; }
+#crop-modal.active { display: flex; }
+#crop-canvas { max-width: 100%; max-height: 72vh; }
+.crop-hint { color: var(--muted); font-size: 12px; padding: 10px 20px; text-align: center; }
+.crop-controls { display: flex; gap: 12px; padding: 12px 20px; width: 100%; justify-content: center; }
+.crop-confirm { background: var(--red); color: #fff; border: none; border-radius: 10px; padding: 14px 32px; font-size: 16px; font-weight: 700; cursor: pointer; }
+.crop-retake { background: var(--card); color: var(--muted); border: 1px solid var(--border); border-radius: 10px; padding: 14px 24px; font-size: 15px; cursor: pointer; }
+
+/* EXPORT */
+.status-box { background: #0a2a1a; border: 1px solid #1a5a2a; border-radius: 8px; padding: 12px; margin-bottom: 16px; color: #4caf50; font-size: 13px; line-height: 1.6; }
+.note { color: var(--dim); font-size: 12px; line-height: 18px; text-align: center; margin-bottom: 24px; }
+.download-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: #1a3a6e; color: #fff; border: none; border-radius: 12px; padding: 18px; font-size: 17px; font-weight: 700; cursor: pointer; margin-top: 12px; text-decoration: none; }
+.download-btn:active { opacity: 0.85; }
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════════ HOME ═══ -->
+<!-- HOME -->
 <div id="home-screen" class="screen active">
   <div class="content">
     <div class="hero">
@@ -260,7 +163,7 @@
   <div class="footer-copy">© 2026 Kino Shin. All rights reserved.</div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════ SETUP ══ -->
+<!-- SETUP -->
 <div id="setup-screen" class="screen">
   <div class="navbar">
     <button class="navbar-back" onclick="goTo('home-screen')">← Back</button>
@@ -268,12 +171,10 @@
     <div style="width:60px"></div>
   </div>
   <div class="content">
-
     <div class="section">
       <label class="label">Style Number</label>
       <input type="text" id="style-number" placeholder="e.g. FFS 99-03-49811-WI26" autocapitalize="characters">
     </div>
-
     <div class="section">
       <label class="label">Garment Type</label>
       <div class="toggle-row">
@@ -281,7 +182,6 @@
         <button class="toggle-btn" id="btn-bottom" onclick="setGarment('bottom')">👖 Bottom</button>
       </div>
     </div>
-
     <div class="section">
       <label class="label">Special Details</label>
       <div class="sublabel">Number of special detail shots (e.g. embroidery, label)</div>
@@ -291,55 +191,49 @@
         <button class="counter-btn" onclick="changeDetail(1)">+</button>
       </div>
     </div>
-
-    <div class="card" id="summary-card">
+    <div class="card">
       <div class="card-title">SESSION SUMMARY</div>
       <div class="card-line" id="sum-slides"></div>
       <div class="card-line" id="sum-photos"></div>
     </div>
-
     <button class="btn-primary" onclick="startSession()">Start Shooting →</button>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════ CAMERA ═ -->
+<!-- CAMERA -->
 <div id="camera-screen" class="screen">
   <video id="video" autoplay playsinline muted></video>
   <canvas id="overlay-canvas"></canvas>
-
   <div class="cam-top">
     <div class="cam-badge" id="cam-pps-badge">PPS to VSO</div>
     <div class="cam-angle" id="cam-angle-label">Front View</div>
     <div class="progress-bar"><div class="progress-fill" id="cam-progress"></div></div>
     <div class="progress-text" id="cam-progress-text">0 / 0 shots</div>
   </div>
-
   <div class="cam-bottom">
     <button class="cam-skip" onclick="skipShot()">Skip</button>
-    <button class="shutter-btn" onclick="capturePhoto()" id="shutter-btn">
+    <button class="shutter-btn" onclick="capturePhoto()">
       <div class="shutter-inner"></div>
     </button>
     <div class="cam-spacer"></div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════ CROP ═══ -->
+<!-- CROP MODAL -->
 <div id="crop-modal">
-  <div style="color:#fff; font-size:14px; padding:16px; text-align:center;">
-    Confirm or retake photo
-  </div>
+  <div style="color:#fff;font-size:14px;padding:16px;text-align:center;font-weight:600;">Check & Confirm Photo</div>
   <canvas id="crop-canvas"></canvas>
-  <div class="crop-hint">The box shows the area that will be saved</div>
+  <div class="crop-hint">The red box shows the area that will be saved</div>
   <div class="crop-controls">
-    <button class="crop-retake" onclick="retakePhoto()">Retake</button>
+    <button class="crop-retake" onclick="retakePhoto()">↩ Retake</button>
     <button class="crop-confirm" onclick="confirmCrop()">Use This →</button>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════ REVIEW ═ -->
+<!-- REVIEW -->
 <div id="review-screen" class="screen">
   <div class="navbar">
-    <button class="navbar-back" onclick="goTo('camera-screen'); resumeCamera()">← Back</button>
+    <button class="navbar-back" onclick="backToCamera()">← Back</button>
     <div class="navbar-title">Review Photos</div>
     <div style="width:60px"></div>
   </div>
@@ -349,10 +243,10 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════ EXPORT ═ -->
+<!-- EXPORT -->
 <div id="export-screen" class="screen">
   <div class="navbar">
-    <button class="navbar-back" onclick="goTo('review-screen'); renderReview()">← Back</button>
+    <button class="navbar-back" onclick="goTo('review-screen');renderReview()">← Back</button>
     <div class="navbar-title">Export PPT</div>
     <div style="width:60px"></div>
   </div>
@@ -367,591 +261,474 @@
 
     <div id="export-status" style="display:none"></div>
 
-    <button class="btn-primary" onclick="doExport()" id="export-btn">Generate & Download PPT</button>
+    <!-- Download button (always visible after generate) -->
+    <a id="download-link" class="download-btn" style="display:none" download>
+      ⬇ Download PPT File
+    </a>
+
+    <button class="btn-primary" onclick="doExport()" id="export-btn">Generate PPT</button>
     <button class="btn-secondary" id="new-session-btn" style="display:none" onclick="newSession()">+ Start New Session</button>
 
     <div class="note" style="margin-top:20px">
-      The PPT file will download to your device.<br>
-      Attach it manually to an email if needed.<br>
-      You can also edit it before converting to PDF.
+      1. Click "Generate PPT" to create and download the file.<br>
+      2. Open your mail app and attach the downloaded file manually.<br>
+      3. You can edit the PPT before converting to PDF.
     </div>
     <div class="footer-copy">© 2026 Kino Shin. All rights reserved.</div>
   </div>
 </div>
 
 <script>
-// ════════════════════════════════════════════════════════════════════════
-// STATE
-// ════════════════════════════════════════════════════════════════════════
-let session = {
-  styleNumber: '',
-  garmentType: 'top',
-  detailCount: 0,
-  photos: {}  // key: "angle_ppsType_detailIndex" => dataURL
-};
-
-// Shot sequence
-function buildSequence() {
-  const angles = ['front', 'left', 'right', 'back'];
-  const ppsTypes = ['vso', 'vendor'];
-  const seq = [];
-  for (const pps of ppsTypes) {
-    for (const ang of angles) {
-      seq.push({ angle: ang, ppsType: pps, detailIndex: null });
-    }
-    for (let i = 0; i < session.detailCount; i++) {
-      seq.push({ angle: 'detail', ppsType: pps, detailIndex: i });
-    }
-  }
-  return seq;
-}
-
-function shotKey(angle, ppsType, detailIndex) {
-  return `${angle}_${ppsType}_${detailIndex ?? 'x'}`;
-}
-
-function getMissing() {
-  return buildSequence().filter(s => !session.photos[shotKey(s.angle, s.ppsType, s.detailIndex)]);
-}
-
-let currentShotIdx = 0;
-const sequence = () => buildSequence();
-
-const ANGLE_LABEL = {
-  front: 'Front View', back: 'Back View',
-  left: 'Left Side View', right: 'Right Side View',
-  detail: 'Special Details'
-};
-const PPS_LABEL = { vso: 'PPS to VSO', vendor: 'PPS keep in Vendor' };
-
-// ════════════════════════════════════════════════════════════════════════
-// NAVIGATION
-// ════════════════════════════════════════════════════════════════════════
-function goTo(screenId) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(screenId).classList.add('active');
-}
-
-// ════════════════════════════════════════════════════════════════════════
-// SETUP SCREEN
-// ════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════ STATE ══════════════════════════════
+let session = { styleNumber:'', garmentType:'top', detailCount:0, photos:{} };
 let detailCount = 0;
 let garmentType = 'top';
-
-function setGarment(type) {
-  garmentType = type;
-  document.getElementById('btn-top').classList.toggle('active', type === 'top');
-  document.getElementById('btn-bottom').classList.toggle('active', type === 'bottom');
-  updateSummary();
-}
-
-function changeDetail(delta) {
-  detailCount = Math.max(0, Math.min(10, detailCount + delta));
-  document.getElementById('detail-count-val').textContent = detailCount;
-  updateSummary();
-}
-
-function updateSummary() {
-  const totalSlides = 4 + detailCount;
-  const totalPhotos = (4 + detailCount) * 2;
-  document.getElementById('sum-slides').textContent =
-    `📋 Total slides: ${totalSlides} (Front / Side / Back${detailCount > 0 ? ' / Details ×' + detailCount : ''})`;
-  document.getElementById('sum-photos').textContent =
-    `📸 Total photos: ${totalPhotos} (VSO + Vendor each)`;
-}
-updateSummary();
-
-function startSession() {
-  const sn = document.getElementById('style-number').value.trim();
-  if (!sn) { alert('Please enter the style number.'); return; }
-  session = { styleNumber: sn, garmentType, detailCount, photos: {} };
-  currentShotIdx = 0;
-  startCamera();
-}
-
-// ════════════════════════════════════════════════════════════════════════
-// CAMERA
-// ════════════════════════════════════════════════════════════════════════
+let currentShotIdx = 0;
 let videoStream = null;
 let capturedDataURL = null;
 let pendingShot = null;
+let generatedBlob = null;
+let generatedFilename = '';
 
-async function startCamera() {
+const ANGLE_LABEL = { front:'Front View', back:'Back View', left:'Left Side View', right:'Right Side View', detail:'Special Details' };
+const PPS_LABEL = { vso:'PPS to VSO', vendor:'PPS keep in Vendor' };
+
+// ══════════════════════════════ SEQUENCE ══════════════════════════════
+function buildSequence() {
+  const angles = ['front','left','right','back'];
+  const seq = [];
+  for (const pps of ['vso','vendor']) {
+    for (const ang of angles) seq.push({angle:ang, ppsType:pps, detailIndex:null});
+    for (let i=0; i<session.detailCount; i++) seq.push({angle:'detail', ppsType:pps, detailIndex:i});
+  }
+  return seq;
+}
+function shotKey(angle,ppsType,detailIndex){ return `${angle}_${ppsType}_${detailIndex??'x'}`; }
+function getMissing(){ return buildSequence().filter(s=>!session.photos[shotKey(s.angle,s.ppsType,s.detailIndex)]); }
+
+// ══════════════════════════════ NAV ══════════════════════════════
+function goTo(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ══════════════════════════════ SETUP ══════════════════════════════
+function setGarment(type){
+  garmentType=type;
+  document.getElementById('btn-top').classList.toggle('active',type==='top');
+  document.getElementById('btn-bottom').classList.toggle('active',type==='bottom');
+  updateSummary();
+}
+function changeDetail(d){
+  detailCount=Math.max(0,Math.min(10,detailCount+d));
+  document.getElementById('detail-count-val').textContent=detailCount;
+  updateSummary();
+}
+function updateSummary(){
+  document.getElementById('sum-slides').textContent=`📋 Total slides: ${4+detailCount}`;
+  document.getElementById('sum-photos').textContent=`📸 Total photos: ${(4+detailCount)*2} (VSO + Vendor each)`;
+}
+updateSummary();
+
+function startSession(){
+  const sn=document.getElementById('style-number').value.trim();
+  if(!sn){alert('Please enter the style number.');return;}
+  session={styleNumber:sn, garmentType, detailCount, photos:{}};
+  currentShotIdx=0;
+  startCamera();
+}
+
+// ══════════════════════════════ CAMERA ══════════════════════════════
+async function startCamera(){
   goTo('camera-screen');
   try {
-    if (videoStream) { videoStream.getTracks().forEach(t => t.stop()); }
-    videoStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } },
-      audio: false
+    if(videoStream) videoStream.getTracks().forEach(t=>t.stop());
+    videoStream=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:{ideal:'environment'}, width:{ideal:1920}, height:{ideal:1080}},
+      audio:false
     });
-    const video = document.getElementById('video');
-    video.srcObject = videoStream;
+    const video=document.getElementById('video');
+    video.srcObject=videoStream;
     await video.play();
-    video.addEventListener('loadedmetadata', () => { resizeOverlay(); drawOverlay(); });
-    window.addEventListener('resize', () => { resizeOverlay(); drawOverlay(); });
+    video.addEventListener('loadedmetadata',()=>{resizeOverlay();drawOverlay();},{once:true});
+    window.addEventListener('resize',()=>{resizeOverlay();drawOverlay();});
     updateCameraUI();
-  } catch(e) {
+  } catch(e){
     alert('Camera access denied. Please allow camera permission and reload.');
   }
 }
 
-async function resumeCamera() {
-  goTo('camera-screen');
-  updateCameraUI();
+function resizeOverlay(){
+  const c=document.getElementById('overlay-canvas');
+  c.width=window.innerWidth; c.height=window.innerHeight;
 }
 
-function resizeOverlay() {
-  const canvas = document.getElementById('overlay-canvas');
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
-
-// Crop ratios per angle (fraction of screen)
-const CROP_RATIO = {
-  front:  { w: 0.75, h: 0.80 },
-  back:   { w: 0.75, h: 0.80 },
-  left:   { w: 0.60, h: 0.80 },
-  right:  { w: 0.60, h: 0.80 },
-  detail: { w: 0.85, h: 0.50 }
+// Crop ratios: width% and height% of screen
+const CROP_RATIO={
+  front: {w:0.72, h:0.78},
+  back:  {w:0.72, h:0.78},
+  left:  {w:0.55, h:0.78},
+  right: {w:0.55, h:0.78},
+  detail:{w:0.85, h:0.48}
 };
 
-function getCropBox(angle) {
-  const canvas = document.getElementById('overlay-canvas');
-  const W = canvas.width, H = canvas.height;
-  const ratio = CROP_RATIO[angle] || CROP_RATIO.front;
-  const bw = W * ratio.w, bh = H * ratio.h;
-  const bx = (W - bw) / 2, by = (H - bh) / 2;
-  return { x: bx, y: by, w: bw, h: bh };
+function getCropBox(angle){
+  const c=document.getElementById('overlay-canvas');
+  const W=c.width, H=c.height;
+  const r=CROP_RATIO[angle]||CROP_RATIO.front;
+  const bw=W*r.w, bh=H*r.h;
+  const bx=(W-bw)/2, by=(H-bh)/2;
+  return {x:bx, y:by, w:bw, h:bh};
 }
 
-function drawOverlay() {
-  const seq = sequence();
-  if (currentShotIdx >= seq.length) return;
-  const shot = seq[currentShotIdx];
-  const canvas = document.getElementById('overlay-canvas');
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  const box = getCropBox(shot.angle);
+// Preloaded silhouette images
+const silImages={};
+function getSilImage(key){
+  if(!silImages[key]){
+    silImages[key]=new Image();
+    silImages[key].src=SILHOUETTES[key];
+  }
+  return silImages[key];
+}
 
-  ctx.clearRect(0, 0, W, H);
+function drawOverlay(){
+  const seq=buildSequence();
+  if(currentShotIdx>=seq.length) return;
+  const shot=seq[currentShotIdx];
+  const canvas=document.getElementById('overlay-canvas');
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  const box=getCropBox(shot.angle);
 
-  // Dim outside crop box
-  ctx.fillStyle = 'rgba(0,0,0,0.50)';
-  ctx.fillRect(0, 0, W, box.y);
-  ctx.fillRect(0, box.y, box.x, box.h);
-  ctx.fillRect(box.x + box.w, box.y, W - box.x - box.w, box.h);
-  ctx.fillRect(0, box.y + box.h, W, H - box.y - box.h);
+  ctx.clearRect(0,0,W,H);
 
-  // Crop guide box (dashed red)
-  ctx.strokeStyle = '#e63946';
-  ctx.lineWidth = 2;
-  ctx.setLineDash([10, 6]);
-  ctx.strokeRect(box.x, box.y, box.w, box.h);
+  // Dim outside
+  ctx.fillStyle='rgba(0,0,0,0.50)';
+  ctx.fillRect(0,0,W,box.y);
+  ctx.fillRect(0,box.y,box.x,box.h);
+  ctx.fillRect(box.x+box.w,box.y,W-box.x-box.w,box.h);
+  ctx.fillRect(0,box.y+box.h,W,H-box.y-box.h);
+
+  // Dashed red crop box
+  ctx.strokeStyle='#e63946'; ctx.lineWidth=2; ctx.setLineDash([10,6]);
+  ctx.strokeRect(box.x,box.y,box.w,box.h);
   ctx.setLineDash([]);
 
-  // Corner marks
-  const cs = 22;
-  ctx.strokeStyle = '#fff';
-  ctx.lineWidth = 3;
-  const corners = [
-    [box.x, box.y], [box.x + box.w, box.y],
-    [box.x, box.y + box.h], [box.x + box.w, box.y + box.h]
-  ];
-  corners.forEach(([cx, cy]) => {
-    const sx = cx === box.x ? 1 : -1;
-    const sy = cy === box.y ? 1 : -1;
+  // White corner marks
+  const cs=24;
+  ctx.strokeStyle='#ffffff'; ctx.lineWidth=3;
+  [[box.x,box.y],[box.x+box.w,box.y],[box.x,box.y+box.h],[box.x+box.w,box.y+box.h]].forEach(([cx,cy])=>{
+    const sx=cx===box.x?1:-1, sy=cy===box.y?1:-1;
     ctx.beginPath();
-    ctx.moveTo(cx + sx * cs, cy); ctx.lineTo(cx, cy); ctx.lineTo(cx, cy + sy * cs);
+    ctx.moveTo(cx+sx*cs,cy); ctx.lineTo(cx,cy); ctx.lineTo(cx,cy+sy*cs);
     ctx.stroke();
   });
 
-  // Silhouette overlay (not for detail shots)
-  if (shot.angle !== 'detail') {
-    const silKey = `sil_${session.garmentType}_${shot.angle}`;
-    const silSrc = SILHOUETTES[silKey];
-    if (silSrc) {
-      const img = new Image();
-      img.onload = () => {
-        ctx.globalAlpha = 0.30;
-        ctx.drawImage(img, box.x + box.w * 0.05, box.y + box.h * 0.05,
-          box.w * 0.90, box.h * 0.90);
-        ctx.globalAlpha = 1.0;
-      };
-      img.src = silSrc;
-    }
+  // Silhouette — centered inside crop box, fitted with padding
+  if(shot.angle!=='detail'){
+    const silKey=`sil_${session.garmentType}_${shot.angle}`;
+    const img=getSilImage(silKey);
+    const drawSil=()=>{
+      // Fit silhouette inside box with 8% padding on each side
+      const padX=box.w*0.08, padY=box.h*0.05;
+      const maxW=box.w-padX*2, maxH=box.h-padY*2;
+      // Keep aspect ratio
+      const imgAsp=img.naturalWidth/img.naturalHeight;
+      let dw,dh;
+      if(maxW/maxH>imgAsp){ dh=maxH; dw=dh*imgAsp; }
+      else { dw=maxW; dh=dw/imgAsp; }
+      // Center inside box
+      const dx=box.x+(box.w-dw)/2;
+      const dy=box.y+(box.h-dh)/2;
+      ctx.globalAlpha=0.35;
+      ctx.drawImage(img,dx,dy,dw,dh);
+      ctx.globalAlpha=1.0;
+    };
+    if(img.complete && img.naturalWidth>0) drawSil();
+    else img.onload=()=>{ resizeOverlay(); drawOverlay(); };
   }
 }
 
-function updateCameraUI() {
-  const seq = sequence();
-  if (currentShotIdx >= seq.length) { goReview(); return; }
-  const shot = seq[currentShotIdx];
-  const done = currentShotIdx;
-  const total = seq.length;
-
-  document.getElementById('cam-pps-badge').textContent = PPS_LABEL[shot.ppsType];
-  let angleText = ANGLE_LABEL[shot.angle];
-  if (shot.angle === 'detail' && shot.detailIndex !== null) {
-    angleText += ` ${shot.detailIndex + 1}/${session.detailCount}`;
-  }
-  document.getElementById('cam-angle-label').textContent = angleText;
-  document.getElementById('cam-progress').style.width = `${(done / total) * 100}%`;
-  document.getElementById('cam-progress-text').textContent = `${done} / ${total} shots`;
-
-  resizeOverlay();
-  drawOverlay();
+function updateCameraUI(){
+  const seq=buildSequence();
+  if(currentShotIdx>=seq.length){goReview();return;}
+  const shot=seq[currentShotIdx];
+  const done=currentShotIdx, total=seq.length;
+  document.getElementById('cam-pps-badge').textContent=PPS_LABEL[shot.ppsType];
+  let lbl=ANGLE_LABEL[shot.angle];
+  if(shot.angle==='detail'&&shot.detailIndex!==null) lbl+=` ${shot.detailIndex+1}/${session.detailCount}`;
+  document.getElementById('cam-angle-label').textContent=lbl;
+  document.getElementById('cam-progress').style.width=`${(done/total)*100}%`;
+  document.getElementById('cam-progress-text').textContent=`${done} / ${total} shots`;
+  resizeOverlay(); drawOverlay();
 }
 
-async function capturePhoto() {
-  const video = document.getElementById('video');
-  const seq = sequence();
-  if (currentShotIdx >= seq.length) return;
-  pendingShot = seq[currentShotIdx];
-
-  // Capture frame from video
-  const offscreen = document.createElement('canvas');
-  offscreen.width = video.videoWidth || 1920;
-  offscreen.height = video.videoHeight || 1080;
-  offscreen.getContext('2d').drawImage(video, 0, 0);
-  capturedDataURL = offscreen.toDataURL('image/jpeg', 0.92);
-
+async function capturePhoto(){
+  const video=document.getElementById('video');
+  const seq=buildSequence();
+  if(currentShotIdx>=seq.length) return;
+  pendingShot=seq[currentShotIdx];
+  const off=document.createElement('canvas');
+  off.width=video.videoWidth||1920; off.height=video.videoHeight||1080;
+  off.getContext('2d').drawImage(video,0,0);
+  capturedDataURL=off.toDataURL('image/jpeg',0.92);
   showCropModal();
 }
 
-// ════════════════════════════════════════════════════════════════════════
-// CROP MODAL
-// ════════════════════════════════════════════════════════════════════════
-function showCropModal() {
-  const modal = document.getElementById('crop-modal');
-  modal.classList.add('active');
+// ══════════════════════════════ CROP MODAL ══════════════════════════════
+function showCropModal(){
+  document.getElementById('crop-modal').classList.add('active');
+  const canvas=document.getElementById('crop-canvas');
+  const ctx=canvas.getContext('2d');
+  const img=new Image();
+  img.onload=()=>{
+    // Scale to fit screen width with margin
+    const maxW=window.innerWidth-24;
+    const scale=Math.min(maxW/img.width, window.innerHeight*0.72/img.height);
+    canvas.width=Math.round(img.width*scale);
+    canvas.height=Math.round(img.height*scale);
+    ctx.drawImage(img,0,0,canvas.width,canvas.height);
 
-  const canvas = document.getElementById('crop-canvas');
-  const ctx = canvas.getContext('2d');
-  const img = new Image();
-  img.onload = () => {
-    // Scale to fit screen width
-    const maxW = window.innerWidth - 32;
-    const scale = maxW / img.width;
-    canvas.width = img.width * scale;
-    canvas.height = img.height * scale;
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    // Map crop box from screen to image coords
+    const r=CROP_RATIO[pendingShot.angle]||CROP_RATIO.front;
+    const sW=window.innerWidth, sH=window.innerHeight;
+    const cropSW=sW*r.w, cropSH=sH*r.h;
+    const cropSX=(sW-cropSW)/2, cropSY=(sH-cropSH)/2;
 
-    // Draw crop box preview on the photo
-    const ratio = CROP_RATIO[pendingShot.angle] || CROP_RATIO.front;
-    // Map crop box from screen coords to photo coords
-    const screenW = window.innerWidth, screenH = window.innerHeight;
-    const cropScreenX = (screenW - screenW * ratio.w) / 2;
-    const cropScreenY = (screenH - screenH * ratio.h) / 2;
-    const cropScreenW = screenW * ratio.w;
-    const cropScreenH = screenH * ratio.h;
+    // Video fill mapping
+    const vidAsp=img.width/img.height, scrAsp=sW/sH;
+    let scX,scY,offX=0,offY=0;
+    if(vidAsp>scrAsp){ scY=sH/img.height; scX=scY; offX=(sW-img.width*scX)/2; }
+    else { scX=sW/img.width; scY=scX; offY=(sH-img.height*scY)/2; }
 
-    // Map video frame area to canvas
-    const vidAspect = img.width / img.height;
-    const screenAspect = screenW / screenH;
-    let scaleX, scaleY, offsetX = 0, offsetY = 0;
-    if (vidAspect > screenAspect) {
-      scaleY = screenH / img.height;
-      scaleX = scaleY;
-      offsetX = (screenW - img.width * scaleX) / 2;
-    } else {
-      scaleX = screenW / img.width;
-      scaleY = scaleX;
-      offsetY = (screenH - img.height * scaleY) / 2;
-    }
+    const iX=(cropSX-offX)/scX, iY=(cropSY-offY)/scY;
+    const iW=cropSW/scX, iH=cropSH/scY;
+    const px=iX*scale, py=iY*scale, pw=iW*scale, ph=iH*scale;
 
-    // Translate crop box to image coords
-    const imgCropX = (cropScreenX - offsetX) / scaleX;
-    const imgCropY = (cropScreenY - offsetY) / scaleY;
-    const imgCropW = cropScreenW / scaleX;
-    const imgCropH = cropScreenH / scaleY;
+    // Dim + box
+    ctx.fillStyle='rgba(0,0,0,0.45)';
+    ctx.fillRect(0,0,canvas.width,py);
+    ctx.fillRect(0,py,px,ph);
+    ctx.fillRect(px+pw,py,canvas.width-px-pw,ph);
+    ctx.fillRect(0,py+ph,canvas.width,canvas.height-py-ph);
+    ctx.strokeStyle='#e63946'; ctx.lineWidth=2; ctx.setLineDash([8,5]);
+    ctx.strokeRect(px,py,pw,ph); ctx.setLineDash([]);
 
-    // Draw on preview canvas (scaled)
-    const px = imgCropX * scale, py = imgCropY * scale;
-    const pw = imgCropW * scale, ph = imgCropH * scale;
-
-    // Dim outside
-    ctx.fillStyle = 'rgba(0,0,0,0.45)';
-    ctx.fillRect(0, 0, canvas.width, py);
-    ctx.fillRect(0, py, px, ph);
-    ctx.fillRect(px + pw, py, canvas.width - px - pw, ph);
-    ctx.fillRect(0, py + ph, canvas.width, canvas.height - py - ph);
-
-    // Box
-    ctx.strokeStyle = '#e63946';
-    ctx.lineWidth = 2;
-    ctx.setLineDash([8, 5]);
-    ctx.strokeRect(px, py, pw, ph);
-    ctx.setLineDash([]);
-
-    // Store crop coords for confirm
-    canvas._cropCoords = { imgCropX, imgCropY, imgCropW, imgCropH, img };
+    canvas._crop={iX,iY,iW,iH,img};
   };
-  img.src = capturedDataURL;
+  img.src=capturedDataURL;
 }
 
-function retakePhoto() {
+function retakePhoto(){
   document.getElementById('crop-modal').classList.remove('active');
-  capturedDataURL = null;
-  pendingShot = null;
+  capturedDataURL=null; pendingShot=null;
 }
 
-function confirmCrop() {
+function confirmCrop(){
   document.getElementById('crop-modal').classList.remove('active');
-  const canvas = document.getElementById('crop-canvas');
-  const { imgCropX, imgCropY, imgCropW, imgCropH, img } = canvas._cropCoords;
-
-  // Crop from original image
-  const out = document.createElement('canvas');
-  out.width = Math.round(imgCropW);
-  out.height = Math.round(imgCropH);
-  out.getContext('2d').drawImage(img, imgCropX, imgCropY, imgCropW, imgCropH, 0, 0, out.width, out.height);
-  const croppedURL = out.toDataURL('image/jpeg', 0.90);
-
-  // Save
-  const key = shotKey(pendingShot.angle, pendingShot.ppsType, pendingShot.detailIndex);
-  session.photos[key] = croppedURL;
-  pendingShot = null;
-  capturedDataURL = null;
-
+  const {iX,iY,iW,iH,img}=document.getElementById('crop-canvas')._crop;
+  const out=document.createElement('canvas');
+  out.width=Math.round(iW); out.height=Math.round(iH);
+  out.getContext('2d').drawImage(img,iX,iY,iW,iH,0,0,out.width,out.height);
+  const key=shotKey(pendingShot.angle,pendingShot.ppsType,pendingShot.detailIndex);
+  session.photos[key]=out.toDataURL('image/jpeg',0.90);
+  pendingShot=null; capturedDataURL=null;
   currentShotIdx++;
-  const seq = sequence();
-  if (currentShotIdx >= seq.length) {
-    goReview();
-  } else {
-    updateCameraUI();
-  }
+  const seq=buildSequence();
+  if(currentShotIdx>=seq.length) goReview();
+  else updateCameraUI();
 }
 
-function skipShot() {
-  const seq = sequence();
+function skipShot(){
   currentShotIdx++;
-  if (currentShotIdx >= seq.length) { goReview(); return; }
+  const seq=buildSequence();
+  if(currentShotIdx>=seq.length){goReview();return;}
   updateCameraUI();
 }
 
-// ════════════════════════════════════════════════════════════════════════
-// REVIEW
-// ════════════════════════════════════════════════════════════════════════
-function goReview() {
-  if (videoStream) { videoStream.getTracks().forEach(t => t.stop()); videoStream = null; }
-  renderReview();
-  goTo('review-screen');
+// ══════════════════════════════ REVIEW ══════════════════════════════
+function goReview(){
+  if(videoStream){videoStream.getTracks().forEach(t=>t.stop());videoStream=null;}
+  renderReview(); goTo('review-screen');
 }
 
-function renderReview() {
-  const container = document.getElementById('review-content');
-  const angles = ['front', 'left', 'right', 'back'];
-  const ppsTypes = ['vso', 'vendor'];
-  let html = `<div style="color:var(--red);font-weight:700;font-size:13px;letter-spacing:1px;margin-bottom:12px">${session.styleNumber}</div>`;
-
-  const missing = getMissing();
-  if (missing.length > 0) {
-    html += `<div class="warning">⚠️ ${missing.length} photo(s) missing</div>`;
-  }
-
-  // Main angles
-  for (const ang of angles) {
-    html += `<div class="review-group"><div class="review-group-title">${ANGLE_LABEL[ang]}</div><div class="thumb-row">`;
-    for (const pps of ppsTypes) {
-      const key = shotKey(ang, pps, null);
-      const photo = session.photos[key];
-      html += `<div class="thumb-card" onclick="retakeFromReview('${ang}','${pps}',null)">`;
-      if (photo) {
-        html += `<img class="thumb-img" src="${photo}" style="aspect-ratio:3/4">`;
-      } else {
-        html += `<div class="thumb-empty"><span>📷</span><span>Missing</span></div>`;
-      }
-      html += `<div class="pps-tag ${pps==='vso'?'tag-vso':'tag-vendor'}">${pps==='vso'?'VSO':'Vendor'}</div>`;
-      html += `<div class="retake-hint">tap to retake</div></div>`;
-    }
-    html += `</div></div>`;
-  }
-
-  // Details
-  for (let i = 0; i < session.detailCount; i++) {
-    html += `<div class="review-group"><div class="review-group-title">Special Details ${i+1}</div><div class="thumb-row">`;
-    for (const pps of ppsTypes) {
-      const key = shotKey('detail', pps, i);
-      const photo = session.photos[key];
-      html += `<div class="thumb-card" onclick="retakeFromReview('detail','${pps}',${i})">`;
-      if (photo) {
-        html += `<img class="thumb-img" src="${photo}" style="aspect-ratio:16/9">`;
-      } else {
-        html += `<div class="thumb-empty" style="aspect-ratio:16/9"><span>📷</span><span>Missing</span></div>`;
-      }
-      html += `<div class="pps-tag ${pps==='vso'?'tag-vso':'tag-vendor'}">${pps==='vso'?'VSO':'Vendor'}</div>`;
-      html += `<div class="retake-hint">tap to retake</div></div>`;
-    }
-    html += `</div></div>`;
-  }
-
-  container.innerHTML = html;
-}
-
-function retakeFromReview(angle, ppsType, detailIndex) {
-  const seq = sequence();
-  const idx = seq.findIndex(s =>
-    s.angle === angle && s.ppsType === ppsType &&
-    (detailIndex === null ? s.detailIndex === null : s.detailIndex === detailIndex)
-  );
-  if (idx >= 0) currentShotIdx = idx;
+function backToCamera(){
+  // Go back to last shot position in camera
   startCamera();
 }
 
-// ════════════════════════════════════════════════════════════════════════
-// EXPORT
-// ════════════════════════════════════════════════════════════════════════
-function goExport() {
-  const missing = getMissing();
-  const totalShots = sequence().length;
-  const done = totalShots - missing.length;
+function renderReview(){
+  const c=document.getElementById('review-content');
+  const angles=['front','left','right','back'];
+  const missing=getMissing();
+  let html=`<div style="color:var(--red);font-weight:700;font-size:13px;letter-spacing:1px;margin-bottom:12px">${session.styleNumber}</div>`;
+  if(missing.length>0) html+=`<div class="warning">⚠️ ${missing.length} photo(s) missing</div>`;
 
-  let summaryHTML = `
+  for(const ang of angles){
+    html+=`<div class="review-group"><div class="review-group-title">${ANGLE_LABEL[ang]}</div><div class="thumb-row">`;
+    for(const pps of ['vso','vendor']){
+      const key=shotKey(ang,pps,null), photo=session.photos[key];
+      html+=`<div class="thumb-card" onclick="retakeFromReview('${ang}','${pps}',null)">`;
+      html+=photo?`<img class="thumb-img" src="${photo}">`:`<div class="thumb-empty"><span>📷</span><span>Missing</span></div>`;
+      html+=`<div class="pps-tag ${pps==='vso'?'tag-vso':'tag-vendor'}">${pps==='vso'?'VSO':'Vendor'}</div>`;
+      html+=`<div class="retake-hint">tap to retake</div></div>`;
+    }
+    html+=`</div></div>`;
+  }
+  for(let i=0;i<session.detailCount;i++){
+    html+=`<div class="review-group"><div class="review-group-title">Special Details ${i+1}</div><div class="thumb-row">`;
+    for(const pps of ['vso','vendor']){
+      const key=shotKey('detail',pps,i), photo=session.photos[key];
+      html+=`<div class="thumb-card" onclick="retakeFromReview('detail','${pps}',${i})">`;
+      html+=photo?`<img class="thumb-img" src="${photo}" style="aspect-ratio:16/9">`:`<div class="thumb-empty" style="aspect-ratio:16/9"><span>📷</span><span>Missing</span></div>`;
+      html+=`<div class="pps-tag ${pps==='vso'?'tag-vso':'tag-vendor'}">${pps==='vso'?'VSO':'Vendor'}</div>`;
+      html+=`<div class="retake-hint">tap to retake</div></div>`;
+    }
+    html+=`</div></div>`;
+  }
+  c.innerHTML=html;
+}
+
+function retakeFromReview(angle,ppsType,detailIndex){
+  const seq=buildSequence();
+  const idx=seq.findIndex(s=>s.angle===angle&&s.ppsType===ppsType&&(detailIndex===null?s.detailIndex===null:s.detailIndex===detailIndex));
+  if(idx>=0) currentShotIdx=idx;
+  startCamera();
+}
+
+// ══════════════════════════════ EXPORT ══════════════════════════════
+function goExport(){
+  const missing=getMissing();
+  const total=buildSequence().length;
+  const done=total-missing.length;
+  document.getElementById('export-summary').innerHTML=`
     <div class="card-title">SESSION SUMMARY</div>
     <div class="card-line">📋 Style: ${session.styleNumber}</div>
-    <div class="card-line">👕 Type: ${session.garmentType === 'top' ? 'Top' : 'Bottom'}</div>
-    <div class="card-line">📸 Photos: ${done} / ${totalShots}</div>
-    <div class="card-line">🖼 Slides: ${1 + 4 + session.detailCount} (incl. title)</div>
-  `;
-  document.getElementById('export-summary').innerHTML = summaryHTML;
-
-  const warnEl = document.getElementById('export-warning');
-  if (missing.length > 0) {
-    warnEl.textContent = `⚠️ ${missing.length} photo(s) missing — blank placeholders will be used.`;
-    warnEl.style.display = 'block';
-  } else {
-    warnEl.style.display = 'none';
-  }
-
-  document.getElementById('export-status').style.display = 'none';
-  document.getElementById('new-session-btn').style.display = 'none';
-  document.getElementById('export-btn').textContent = 'Generate & Download PPT';
-
+    <div class="card-line">👕 Type: ${session.garmentType==='top'?'Top':'Bottom'}</div>
+    <div class="card-line">📸 Photos: ${done} / ${total}</div>
+    <div class="card-line">🖼 Slides: ${1+4+session.detailCount} (incl. title)</div>`;
+  const w=document.getElementById('export-warning');
+  if(missing.length>0){w.textContent=`⚠️ ${missing.length} photo(s) missing — placeholders will be used.`;w.style.display='block';}
+  else w.style.display='none';
+  document.getElementById('export-status').style.display='none';
+  document.getElementById('download-link').style.display='none';
+  document.getElementById('new-session-btn').style.display='none';
+  document.getElementById('export-btn').textContent='Generate PPT';
+  document.getElementById('export-btn').disabled=false;
   goTo('export-screen');
 }
 
-async function doExport() {
-  const email = document.getElementById('recipient-email').value.trim();
-  if (!email) { alert('Please enter recipient email address.'); return; }
-
-  const btn = document.getElementById('export-btn');
-  btn.textContent = 'Generating…';
-  btn.disabled = true;
-
+async function doExport(){
+  const btn=document.getElementById('export-btn');
+  btn.textContent='Generating…'; btn.disabled=true;
   try {
-    const filePath = await generatePPT();
+    const {blob, filename} = await generatePPT();
+    generatedBlob=blob; generatedFilename=filename;
 
-    const statusEl = document.getElementById('export-status');
-    statusEl.className = 'status-box';
-    statusEl.innerHTML = `✓ PPT downloaded!<br><small>Now open your mail app, compose to: <strong>${email}</strong>, and attach the downloaded file.</small>`;
-    statusEl.style.display = 'block';
+    // Create download URL
+    const url=URL.createObjectURL(blob);
+    const dlLink=document.getElementById('download-link');
+    dlLink.href=url;
+    dlLink.download=filename;
+    dlLink.style.display='flex';
 
-    // Open mail app with mailto
-    window.location.href = `mailto:${email}?subject=PPS Review Record — ${encodeURIComponent(session.styleNumber)}&body=Please find the attached PPS Review Record for style ${encodeURIComponent(session.styleNumber)}.%0A%0AHansoll Vina`;
+    // Trigger download immediately
+    dlLink.click();
 
-    document.getElementById('new-session-btn').style.display = 'block';
-    btn.textContent = 'Download Again';
-    btn.disabled = false;
-  } catch(e) {
-    alert('Export failed: ' + e.message);
-    btn.textContent = 'Generate & Download PPT';
-    btn.disabled = false;
+    // Show status
+    const email=document.getElementById('recipient-email').value.trim();
+    const statusEl=document.getElementById('export-status');
+    statusEl.className='status-box';
+    statusEl.innerHTML=`✓ PPT file downloaded!<br><br>`+
+      (email?`<strong>Next steps:</strong><br>1. Open your Mail app<br>2. Compose to: <strong>${email}</strong><br>3. Attach the downloaded .pptx file`:'<strong>Next:</strong> Open Mail app and attach the downloaded .pptx file');
+    statusEl.style.display='block';
+
+    // mailto
+    if(email){
+      setTimeout(()=>{
+        window.location.href=`mailto:${email}?subject=PPS Review Record — ${encodeURIComponent(session.styleNumber)}&body=Please find the attached PPS Review Record for style ${encodeURIComponent(session.styleNumber)}.%0A%0AHansoll Vina`;
+      },1200);
+    }
+
+    document.getElementById('new-session-btn').style.display='block';
+    btn.textContent='Regenerate PPT';
+    btn.disabled=false;
+  } catch(e){
+    alert('Export failed: '+e.message);
+    btn.textContent='Generate PPT'; btn.disabled=false;
   }
 }
 
-async function generatePPT() {
-  const prs = new PptxGenJS();
-  prs.layout = 'LAYOUT_WIDE';
+// ══════════════════════════════ PPT GENERATOR ══════════════════════════════
+async function generatePPT(){
+  const prs=new PptxGenJS();
+  prs.layout='LAYOUT_WIDE';
+  const SW=13.33, SH=7.5;
+  const LX=0.3, LW=SW/2-0.55;
+  const RX=SW/2+0.25, RW=SW/2-0.55;
 
-  const SW = 13.33, SH = 7.5;
-  const LX = 0.3,  LW = SW/2 - 0.55;
-  const RX = SW/2 + 0.25, RW = SW/2 - 0.55;
+  function getP(angle,ppsType,di){ return session.photos[shotKey(angle,ppsType,di)]||null; }
 
-  function getPhoto(angle, ppsType, detailIndex) {
-    return session.photos[shotKey(angle, ppsType, detailIndex)] || null;
-  }
+  // Title slide
+  const ts=prs.addSlide();
+  ts.background={color:'1a1a2e'};
+  ts.addText('ARITZIA',{x:0,y:2.1,w:SW,h:0.4,align:'center',fontSize:13,color:'888888',charSpacing:8});
+  ts.addText('PPS Review Record',{x:0,y:2.7,w:SW,h:0.7,align:'center',fontSize:30,bold:true,color:'FFFFFF'});
+  ts.addText(session.styleNumber,{x:0,y:3.55,w:SW,h:0.5,align:'center',fontSize:18,bold:true,color:'e63946',charSpacing:2});
+  ts.addText('Hansoll Vina',{x:0,y:4.15,w:SW,h:0.4,align:'center',fontSize:13,color:'666666',charSpacing:4});
+  ts.addText('© 2026 Kino Shin. All rights reserved.',{x:0,y:SH-0.4,w:SW,h:0.3,align:'center',fontSize:9,color:'444444'});
 
-  // ── Title slide
-  const title = prs.addSlide();
-  title.background = { color: '1a1a2e' };
-  title.addText('ARITZIA', { x:0, y:2.1, w:SW, h:0.4, align:'center', fontSize:13, color:'888888', charSpacing:8 });
-  title.addText('PPS Review Record', { x:0, y:2.7, w:SW, h:0.7, align:'center', fontSize:30, bold:true, color:'FFFFFF' });
-  title.addText(session.styleNumber, { x:0, y:3.55, w:SW, h:0.5, align:'center', fontSize:18, bold:true, color:'e63946', charSpacing:2 });
-  title.addText('Hansoll Vina', { x:0, y:4.15, w:SW, h:0.4, align:'center', fontSize:13, color:'666666', charSpacing:4 });
-  title.addText('© 2026 Kino Shin. All rights reserved.', { x:0, y:SH-0.4, w:SW, h:0.3, align:'center', fontSize:9, color:'444444' });
+  async function addSlide(title, lPhotos, rPhotos){
+    const sl=prs.addSlide();
+    sl.background={color:'FFFFFF'};
+    sl.addText(title,{x:LX,y:0.22,w:SW-LX*2,h:0.44,fontSize:20,bold:true,color:'222222',underline:{style:'sng',color:'222222'}});
+    sl.addText('• PPS to VSO',{x:LX,y:0.74,w:LW,h:0.28,fontSize:13,color:'1a3a6e'});
+    sl.addText('• PPS keep in Vendor',{x:RX,y:0.74,w:RW,h:0.28,fontSize:13,color:'2a1a4e'});
+    const imgY=1.1, imgH=SH-imgY-0.15;
 
-  // ── Garment slide helper
-  async function addSlide(slideTitle, leftPhotos, rightPhotos) {
-    const slide = prs.addSlide();
-    slide.background = { color: 'FFFFFF' };
-    slide.addText(slideTitle, {
-      x:LX, y:0.22, w:SW-LX*2, h:0.44,
-      fontSize:20, bold:true, color:'222222',
-      underline: { style: 'sng', color: '222222' }
-    });
-    slide.addText('• PPS to VSO', { x:LX, y:0.74, w:LW, h:0.28, fontSize:13, color:'1a3a6e' });
-    slide.addText('• PPS keep in Vendor', { x:RX, y:0.74, w:RW, h:0.28, fontSize:13, color:'2a1a4e' });
-
-    const imgY = 1.1, imgH = SH - imgY - 0.15;
-
-    async function renderCol(photos, colX, colW) {
-      if (photos.length === 1) {
-        if (photos[0]) {
-          slide.addImage({ data: photos[0], x:colX, y:imgY, w:colW, h:imgH, sizing:{type:'contain',w:colW,h:imgH} });
-        } else {
-          slide.addShape(prs.ShapeType.rect, { x:colX, y:imgY, w:colW, h:imgH, fill:{color:'F0F0F0'}, line:{color:'CCCCCC',width:0.5} });
-          slide.addText('Photo Missing', { x:colX, y:imgY+imgH/2-0.2, w:colW, h:0.4, align:'center', color:'AAAAAA', fontSize:12 });
-        }
+    async function col(photos,cx,cw){
+      if(photos.length===1){
+        if(photos[0]) sl.addImage({data:photos[0],x:cx,y:imgY,w:cw,h:imgH,sizing:{type:'contain',w:cw,h:imgH}});
+        else{sl.addShape(prs.ShapeType.rect,{x:cx,y:imgY,w:cw,h:imgH,fill:{color:'F0F0F0'},line:{color:'CCCCCC',width:0.5}});sl.addText('Photo Missing',{x:cx,y:imgY+imgH/2-0.2,w:cw,h:0.4,align:'center',color:'AAAAAA',fontSize:12});}
       } else {
-        const subW = (colW - 0.1) / 2;
-        for (let i = 0; i < 2; i++) {
-          const x = colX + i * (subW + 0.1);
-          if (photos[i]) {
-            slide.addImage({ data: photos[i], x, y:imgY, w:subW, h:imgH, sizing:{type:'contain',w:subW,h:imgH} });
-          } else {
-            slide.addShape(prs.ShapeType.rect, { x, y:imgY, w:subW, h:imgH, fill:{color:'F0F0F0'}, line:{color:'CCCCCC',width:0.5} });
-            slide.addText('Photo Missing', { x, y:imgY+imgH/2-0.2, w:subW, h:0.4, align:'center', color:'AAAAAA', fontSize:12 });
-          }
+        const sw=(cw-0.1)/2;
+        for(let i=0;i<2;i++){
+          const x=cx+i*(sw+0.1);
+          if(photos[i]) sl.addImage({data:photos[i],x,y:imgY,w:sw,h:imgH,sizing:{type:'contain',w:sw,h:imgH}});
+          else{sl.addShape(prs.ShapeType.rect,{x,y:imgY,w:sw,h:imgH,fill:{color:'F0F0F0'},line:{color:'CCCCCC',width:0.5}});sl.addText('Photo Missing',{x,y:imgY+imgH/2-0.2,w:sw,h:0.4,align:'center',color:'AAAAAA',fontSize:12});}
         }
       }
     }
-
-    await renderCol(leftPhotos, LX, LW);
-    await renderCol(rightPhotos, RX, RW);
+    await col(lPhotos,LX,LW);
+    await col(rPhotos,RX,RW);
   }
 
-  // Front
-  await addSlide('Garment Front View',
-    [getPhoto('front','vso',null)], [getPhoto('front','vendor',null)]);
-  // Side (2 photos each side)
-  await addSlide('Garment Side View',
-    [getPhoto('left','vso',null), getPhoto('right','vso',null)],
-    [getPhoto('left','vendor',null), getPhoto('right','vendor',null)]);
-  // Back
-  await addSlide('Garment Back View',
-    [getPhoto('back','vso',null)], [getPhoto('back','vendor',null)]);
-  // Details
-  for (let i = 0; i < session.detailCount; i++) {
-    await addSlide('Garment Special Details Highlight',
-      [getPhoto('detail','vso',i)], [getPhoto('detail','vendor',i)]);
+  await addSlide('Garment Front View',[getP('front','vso',null)],[getP('front','vendor',null)]);
+  await addSlide('Garment Side View',[getP('left','vso',null),getP('right','vso',null)],[getP('left','vendor',null),getP('right','vendor',null)]);
+  await addSlide('Garment Back View',[getP('back','vso',null)],[getP('back','vendor',null)]);
+  for(let i=0;i<session.detailCount;i++){
+    await addSlide('Garment Special Details Highlight',[getP('detail','vso',i)],[getP('detail','vendor',i)]);
   }
 
-  // Download
-  const safeStyle = session.styleNumber.replace(/[^\w\-]/g, '_');
-  const fileName = `${safeStyle}_PPS_review_record.pptx`;
-  await prs.writeFile({ fileName });
-  return fileName;
+  const safe=session.styleNumber.replace(/[^\w\-]/g,'_');
+  const filename=`${safe}_PPS_review_record.pptx`;
+
+  // Return as blob for download
+  const b64=await prs.write({outputType:'base64'});
+  const binary=atob(b64);
+  const bytes=new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
+  const blob=new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.presentationml.presentation'});
+  return {blob, filename};
 }
 
-function newSession() {
-  session = { styleNumber:'', garmentType:'top', detailCount:0, photos:{} };
-  currentShotIdx = 0;
-  detailCount = 0;
-  garmentType = 'top';
-  document.getElementById('style-number').value = '';
-  document.getElementById('detail-count-val').textContent = '0';
-  setGarment('top');
-  updateSummary();
+function newSession(){
+  session={styleNumber:'',garmentType:'top',detailCount:0,photos:{}};
+  currentShotIdx=0; detailCount=0; garmentType='top';
+  generatedBlob=null; generatedFilename='';
+  document.getElementById('style-number').value='';
+  document.getElementById('detail-count-val').textContent='0';
+  setGarment('top'); updateSummary();
   goTo('home-screen');
 }
 </script>

@@ -525,6 +525,7 @@ function showCropModal(){
     ctx.strokeRect(px,py,pw,ph); ctx.setLineDash([]);
 
     canvas._crop={iX,iY,iW,iH,img};
+    console.log(`Crop coords: iX=${iX.toFixed(0)} iY=${iY.toFixed(0)} iW=${iW.toFixed(0)} iH=${iH.toFixed(0)} angle=${pendingShot.angle} garment=${session.garmentType}`);
   };
   img.src=capturedDataURL;
 }
@@ -539,18 +540,22 @@ function confirmCrop(){
   const {iX,iY,iW,iH,img}=document.getElementById('crop-canvas')._crop;
   const out=document.createElement('canvas');
 
-  // Top front/back: force square crop (take the shorter side, center the other)
+  // Top front/back: force true square from center of crop region
   const isTopSquare = session.garmentType==='top' && (pendingShot.angle==='front'||pendingShot.angle==='back');
   let srcX=iX, srcY=iY, srcW=iW, srcH=iH;
   if(isTopSquare){
+    // Use the width as the square side (crop box is already square-ish, but image coords may differ slightly)
+    // Take the smaller dimension and center the crop
     const side=Math.min(iW,iH);
     srcX=iX+(iW-side)/2;
     srcY=iY+(iH-side)/2;
-    srcW=side; srcH=side;
+    srcW=side;
+    srcH=side;
   }
 
-  out.width=Math.round(srcW); out.height=Math.round(srcH);
-  out.getContext('2d').drawImage(img,srcX,srcY,srcW,srcH,0,0,out.width,out.height);
+  out.width=Math.round(srcW);
+  out.height=Math.round(srcH);
+  out.getContext('2d').drawImage(img, srcX, srcY, srcW, srcH, 0, 0, out.width, out.height);
   const key=shotKey(pendingShot.angle,pendingShot.ppsType,pendingShot.detailIndex);
   session.photos[key]=out.toDataURL('image/jpeg',0.90);
   pendingShot=null; capturedDataURL=null;
@@ -707,23 +712,20 @@ async function generatePPT(){
     sl.addText('• PPS keep in Vendor',{x:RX,y:0.74,w:RW,h:0.28,fontSize:13,color:'2a1a4e'});
     const imgY=1.1, imgH=SH-imgY-0.15;
 
-    // Top front/back: square image → place as square centered in column
-    // Bottom front/back: contain (preserve ratio)
-    // Side: contain
-    const isTopFrontBack = session.garmentType==='top' && (slideAngle==='front'||slideAngle==='back');
-    const isBottomFrontBack = session.garmentType==='bottom' && (slideAngle==='front'||slideAngle==='back');
+    // Top front/back: already square photo → place as square centered
+    const isTopFB = session.garmentType==='top' && (slideAngle==='front'||slideAngle==='back');
 
     async function col(photos,cx,cw){
       if(photos.length===1){
         if(photos[0]){
-          if(isTopFrontBack){
-            // Square: fit as square centered in column area
+          if(isTopFB){
+            // Square photo: fit as square, centered in column
             const side=Math.min(cw,imgH);
             const ox=cx+(cw-side)/2;
             const oy=imgY+(imgH-side)/2;
             sl.addImage({data:photos[0],x:ox,y:oy,w:side,h:side});
           } else {
-            // contain (preserve ratio)
+            // All others: contain (preserve ratio)
             sl.addImage({data:photos[0],x:cx,y:imgY,w:cw,h:imgH,sizing:{type:'contain',w:cw,h:imgH}});
           }
         } else {
@@ -731,12 +733,15 @@ async function generatePPT(){
           sl.addText('Photo Missing',{x:cx,y:imgY+imgH/2-0.2,w:cw,h:0.4,align:'center',color:'AAAAAA',fontSize:12});
         }
       } else {
-        // Side view: 2 photos
+        // Side view: always 2 photos, always contain
         const sw=(cw-0.1)/2;
         for(let i=0;i<2;i++){
           const x=cx+i*(sw+0.1);
           if(photos[i]) sl.addImage({data:photos[i],x,y:imgY,w:sw,h:imgH,sizing:{type:'contain',w:sw,h:imgH}});
-          else{sl.addShape(prs.ShapeType.rect,{x,y:imgY,w:sw,h:imgH,fill:{color:'F0F0F0'},line:{color:'CCCCCC',width:0.5}});sl.addText('Photo Missing',{x,y:imgY+imgH/2-0.2,w:sw,h:0.4,align:'center',color:'AAAAAA',fontSize:12});}
+          else{
+            sl.addShape(prs.ShapeType.rect,{x,y:imgY,w:sw,h:imgH,fill:{color:'F0F0F0'},line:{color:'CCCCCC',width:0.5}});
+            sl.addText('Photo Missing',{x,y:imgY+imgH/2-0.2,w:sw,h:0.4,align:'center',color:'AAAAAA',fontSize:12});
+          }
         }
       }
     }

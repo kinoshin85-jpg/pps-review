@@ -445,8 +445,10 @@ function drawOverlay(){
     ctx.stroke();
   });
 
-  // Silhouette — perfectly centered inside crop box
-  if(shot.angle!=='detail'){
+  // Silhouette — centered inside crop box (not shown for detail or top side views)
+  const showSil = shot.angle !== 'detail' &&
+                  !(session.garmentType==='top' && (shot.angle==='left'||shot.angle==='right'));
+  if(showSil){
     const silKey=`sil_${session.garmentType}_${shot.angle}`;
     const img=getSilImage(silKey);
     const drawSil=()=>{
@@ -727,10 +729,19 @@ async function generatePPT(){
     const imgY=1.1, imgH=SH-imgY-0.15;
 
     // Top front/back: square photo → square centered
-    // Bottom front/back: as-is (no resizing, original ratio)
+    // Bottom front/back: original ratio, calculate real dimensions
     // Side: contain
     const isTopFB   = session.garmentType==='top'    && (slideAngle==='front'||slideAngle==='back');
     const isBottomFB= session.garmentType==='bottom' && (slideAngle==='front'||slideAngle==='back');
+
+    // Helper: get image natural dimensions from dataURL
+    function getImgSize(dataUrl){
+      return new Promise(res=>{
+        const i=new Image();
+        i.onload=()=>res({w:i.naturalWidth,h:i.naturalHeight});
+        i.src=dataUrl;
+      });
+    }
 
     async function col(photos,cx,cw){
       if(photos.length===1){
@@ -742,10 +753,15 @@ async function generatePPT(){
             const oy=imgY+(imgH-side)/2;
             sl.addImage({data:photos[0],x:ox,y:oy,w:side,h:side});
           } else if(isBottomFB){
-            // Original ratio, no forced sizing — fit within column preserving ratio
-            sl.addImage({data:photos[0],x:cx,y:imgY,w:cw,h:imgH,sizing:{type:'contain',w:cw,h:imgH}});
+            // Compute real aspect ratio, scale to fit column, no distortion
+            const {w:nw,h:nh}=await getImgSize(photos[0]);
+            const asp=nw/nh;
+            let dw=cw, dh=cw/asp;
+            if(dh>imgH){ dh=imgH; dw=imgH*asp; }
+            const ox=cx+(cw-dw)/2;
+            const oy=imgY+(imgH-dh)/2;
+            sl.addImage({data:photos[0],x:ox,y:oy,w:dw,h:dh});
           } else {
-            // Detail, side (single): contain
             sl.addImage({data:photos[0],x:cx,y:imgY,w:cw,h:imgH,sizing:{type:'contain',w:cw,h:imgH}});
           }
         } else {

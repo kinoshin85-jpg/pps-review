@@ -424,23 +424,23 @@ function drawOverlay(){
     ctx.stroke();
   });
 
-  // Silhouette — centered inside crop box, fitted with padding
+  // Silhouette — perfectly centered inside crop box
   if(shot.angle!=='detail'){
     const silKey=`sil_${session.garmentType}_${shot.angle}`;
     const img=getSilImage(silKey);
     const drawSil=()=>{
-      // Fit silhouette inside box with 8% padding on each side
-      const padX=box.w*0.08, padY=box.h*0.05;
-      const maxW=box.w-padX*2, maxH=box.h-padY*2;
-      // Keep aspect ratio
+      // Fit within crop box with 6% padding, maintaining aspect ratio
+      const pad=0.06;
+      const maxW=box.w*(1-pad*2);
+      const maxH=box.h*(1-pad*2);
       const imgAsp=img.naturalWidth/img.naturalHeight;
       let dw,dh;
       if(maxW/maxH>imgAsp){ dh=maxH; dw=dh*imgAsp; }
       else { dw=maxW; dh=dw/imgAsp; }
-      // Center inside box
+      // Strictly center within crop box
       const dx=box.x+(box.w-dw)/2;
       const dy=box.y+(box.h-dh)/2;
-      ctx.globalAlpha=0.35;
+      ctx.globalAlpha=0.38;
       ctx.drawImage(img,dx,dy,dw,dh);
       ctx.globalAlpha=1.0;
     };

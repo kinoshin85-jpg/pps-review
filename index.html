@@ -255,11 +255,6 @@ input::placeholder { color: var(--dim); }
     <div class="card" id="export-summary"></div>
     <div id="export-warning" class="warning" style="display:none"></div>
 
-    <div class="section">
-      <label class="label">Recipient Email</label>
-      <input type="email" id="recipient-email" placeholder="example@hansollvina.com" autocapitalize="none">
-    </div>
-
     <div id="export-status" style="display:none"></div>
 
     <!-- Download button (always visible after generate) -->
@@ -271,9 +266,8 @@ input::placeholder { color: var(--dim); }
     <button class="btn-secondary" id="new-session-btn" style="display:none" onclick="newSession()">+ Start New Session</button>
 
     <div class="note" style="margin-top:20px">
-      1. Click "Generate PPT" to create and download the file.<br>
-      2. Open your mail app and attach the downloaded file manually.<br>
-      3. You can edit the PPT before converting to PDF.
+      The PPT file will download to your device.<br>
+      You can edit it before converting to PDF.
     </div>
     <div class="footer-copy">© 2026 Kino Shin. All rights reserved.</div>
   </div>
@@ -667,33 +661,20 @@ async function doExport(){
     const {blob, filename} = await generatePPT();
     generatedBlob=blob; generatedFilename=filename;
 
-    // Create download URL
     const url=URL.createObjectURL(blob);
     const dlLink=document.getElementById('download-link');
     dlLink.href=url;
     dlLink.download=filename;
     dlLink.style.display='flex';
-
-    // Trigger download immediately
     dlLink.click();
 
-    // Show status
-    const email=document.getElementById('recipient-email').value.trim();
     const statusEl=document.getElementById('export-status');
     statusEl.className='status-box';
-    statusEl.innerHTML=`✓ PPT file downloaded!<br><br>`+
-      (email?`<strong>Next steps:</strong><br>1. Open your Mail app<br>2. Compose to: <strong>${email}</strong><br>3. Attach the downloaded .pptx file`:'<strong>Next:</strong> Open Mail app and attach the downloaded .pptx file');
+    statusEl.innerHTML=`✓ PPT downloaded! Check your Downloads folder.`;
     statusEl.style.display='block';
 
-    // mailto
-    if(email){
-      setTimeout(()=>{
-        window.location.href=`mailto:${email}?subject=PPS Review Record — ${encodeURIComponent(session.styleNumber)}&body=Please find the attached PPS Review Record for style ${encodeURIComponent(session.styleNumber)}.%0A%0AHansoll Textile`;
-      },1200);
-    }
-
     document.getElementById('new-session-btn').style.display='block';
-    btn.textContent='Regenerate PPT';
+    btn.textContent='Download Again';
     btn.disabled=false;
   } catch(e){
     alert('Export failed: '+e.message);
@@ -718,7 +699,6 @@ async function generatePPT(){
   ts.addText('PPS Review Record',{x:0,y:2.7,w:SW,h:0.7,align:'center',fontSize:30,bold:true,color:'FFFFFF'});
   ts.addText(session.styleNumber,{x:0,y:3.55,w:SW,h:0.5,align:'center',fontSize:18,bold:true,color:'e63946',charSpacing:2});
   ts.addText('Hansoll Textile',{x:0,y:4.15,w:SW,h:0.4,align:'center',fontSize:13,color:'666666',charSpacing:4});
-  ts.addText('© 2026 Kino Shin. All rights reserved.',{x:0,y:SH-0.4,w:SW,h:0.3,align:'center',fontSize:9,color:'444444'});
 
   async function addSlide(title, lPhotos, rPhotos, slideAngle){
     const sl=prs.addSlide();

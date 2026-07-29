@@ -285,7 +285,7 @@ let pendingShot = null;
 let generatedBlob = null;
 let generatedFilename = '';
 
-const ANGLE_LABEL = { front:'Front View', back:'Back View', left:'Left Side View', right:'Right Side View', detail:'Special Details' };
+const ANGLE_LABEL = { front:'Front View', back:'Back View', left:'Left Side View', right:'Right Side View', detail:'Special Details', folding:'Folding Method' };
 const PPS_LABEL = { vso:'PPS to VSO', vendor:'PPS keep in Vendor' };
 
 // ══════════════════════════════ SEQUENCE ══════════════════════════════
@@ -296,6 +296,8 @@ function buildSequence() {
     for (const ang of angles) seq.push({angle:ang, ppsType:pps, detailIndex:null});
     for (let i=0; i<session.detailCount; i++) seq.push({angle:'detail', ppsType:pps, detailIndex:i});
   }
+  // Folding: single shot at the very end (ppsType='vso' as placeholder key)
+  seq.push({angle:'folding', ppsType:'vso', detailIndex:null});
   return seq;
 }
 function shotKey(angle,ppsType,detailIndex){ return `${angle}_${ppsType}_${detailIndex??'x'}`; }
@@ -320,8 +322,8 @@ function changeDetail(d){
   updateSummary();
 }
 function updateSummary(){
-  document.getElementById('sum-slides').textContent=`📋 Total slides: ${4+detailCount}`;
-  document.getElementById('sum-photos').textContent=`📸 Total photos: ${(4+detailCount)*2} (VSO + Vendor each)`;
+  document.getElementById('sum-slides').textContent=`📋 Total slides: ${4+detailCount+1} (Front / Side / Back${detailCount>0?' / Details ×'+detailCount:''} / Folding)`;
+  document.getElementById('sum-photos').textContent=`📸 Total photos: ${(4+detailCount)*2+1} (VSO + Vendor each, +1 Folding)`;
 }
 updateSummary();
 
@@ -368,7 +370,8 @@ const CROP_RATIO={
   back:  {w:0.72, h:0.88},
   left:  {w:0.55, h:0.78},
   right: {w:0.55, h:0.78},
-  detail:{w:0.85, h:0.48}
+  detail:{w:0.85, h:0.48},
+  folding:{w:0.80, h:0.80}
 };
 
 function getEffectiveCropRatio(angle){
@@ -440,7 +443,7 @@ function drawOverlay(){
   });
 
   // Silhouette — centered inside crop box (not shown for detail or top side views)
-  const showSil = shot.angle !== 'detail' &&
+  const showSil = shot.angle !== 'detail' && shot.angle !== 'folding' &&
                   !(session.garmentType==='top' && (shot.angle==='left'||shot.angle==='right'));
   if(showSil){
     const silKey=`sil_${session.garmentType}_${shot.angle}`;
@@ -484,7 +487,7 @@ function updateCameraUI(){
   if(currentShotIdx>=seq.length){goReview();return;}
   const shot=seq[currentShotIdx];
   const done=currentShotIdx, total=seq.length;
-  document.getElementById('cam-pps-badge').textContent=PPS_LABEL[shot.ppsType];
+  document.getElementById('cam-pps-badge').textContent = shot.angle==='folding' ? 'Single Shot' : PPS_LABEL[shot.ppsType];
   let lbl=ANGLE_LABEL[shot.angle];
   if(shot.angle==='detail'&&shot.detailIndex!==null) lbl+=` ${shot.detailIndex+1}/${session.detailCount}`;
   document.getElementById('cam-angle-label').textContent=lbl;
@@ -622,6 +625,17 @@ function renderReview(){
     }
     html+=`</div></div>`;
   }
+  // Folding shot
+  const foldKey=shotKey('folding','vso',null);
+  const foldPhoto=session.photos[foldKey];
+  html+=`<div class="review-group"><div class="review-group-title">Folding Method</div><div class="thumb-row">`;
+  html+=`<div class="thumb-card" onclick="retakeFromReview('folding','vso',null)" style="max-width:50%">`;
+  html+=foldPhoto
+    ?`<img class="thumb-img" src="${foldPhoto}" style="aspect-ratio:1/1">`
+    :`<div class="thumb-empty" style="aspect-ratio:1/1"><span>📷</span><span>Missing</span></div>`;
+  html+=`<div class="pps-tag" style="background:#444">Single Shot</div>`;
+  html+=`<div class="retake-hint">tap to retake</div></div></div></div>`;
+
   c.innerHTML=html;
 }
 
@@ -642,7 +656,7 @@ function goExport(){
     <div class="card-line">📋 Style: ${session.styleNumber}</div>
     <div class="card-line">👕 Type: ${session.garmentType==='top'?'Top':'Bottom'}</div>
     <div class="card-line">📸 Photos: ${done} / ${total}</div>
-    <div class="card-line">🖼 Slides: ${1+4+session.detailCount} (incl. title)</div>`;
+    <div class="card-line">🖼 Slides: ${1+4+session.detailCount+1} (incl. title + folding)</div>`;
   const w=document.getElementById('export-warning');
   if(missing.length>0){w.textContent=`⚠️ ${missing.length} photo(s) missing — placeholders will be used.`;w.style.display='block';}
   else w.style.display='none';
@@ -770,6 +784,28 @@ async function generatePPT(){
   await addSlide('Garment Back View',[getP('back','vso',null)],[getP('back','vendor',null)],'back');
   for(let i=0;i<session.detailCount;i++){
     await addSlide('Garment Special Details Highlight',[getP('detail','vso',i)],[getP('detail','vendor',i)],'detail');
+  }
+
+  // Folding Method slide — single photo centered
+  const foldSlide=prs.addSlide();
+  foldSlide.background={color:'FFFFFF'};
+  foldSlide.addText('Folding Method',{x:LX,y:0.22,w:SW-LX*2,h:0.44,fontSize:20,bold:true,color:'222222',underline:{style:'sng',color:'222222'}});
+  const foldPhoto=getP('folding','vso',null);
+  const fImgY=1.1, fImgH=SH-fImgY-0.15;
+  // Center column: same width as one side column, centered on slide
+  const fColW=LW;
+  const fColX=(SW-fColW)/2;
+  if(foldPhoto){
+    const {w:nw,h:nh}=await new Promise(res=>{const i=new Image();i.onload=()=>res({w:i.naturalWidth,h:i.naturalHeight});i.src=foldPhoto;});
+    const asp=nw/nh;
+    let dw=fColW, dh=fColW/asp;
+    if(dh>fImgH){dh=fImgH;dw=fImgH*asp;}
+    const ox=fColX+(fColW-dw)/2;
+    const oy=fImgY+(fImgH-dh)/2;
+    foldSlide.addImage({data:foldPhoto,x:ox,y:oy,w:dw,h:dh});
+  } else {
+    foldSlide.addShape(prs.ShapeType.rect,{x:fColX,y:fImgY,w:fColW,h:fImgH,fill:{color:'F0F0F0'},line:{color:'CCCCCC',width:0.5}});
+    foldSlide.addText('Photo Missing',{x:fColX,y:fImgY+fImgH/2-0.2,w:fColW,h:0.4,align:'center',color:'AAAAAA',fontSize:12});
   }
 
   const safe=session.styleNumber.replace(/[^\w\-]/g,'_');

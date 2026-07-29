@@ -371,7 +371,7 @@ const CROP_RATIO={
   left:  {w:0.55, h:0.78},
   right: {w:0.55, h:0.78},
   detail:{w:0.85, h:0.48},
-  folding:{w:0.80, h:0.80}
+  folding:{w:0.80, h:0.55}
 };
 
 function getEffectiveCropRatio(angle){
@@ -385,7 +385,12 @@ function getCropBox(angle){
   const c=document.getElementById('overlay-canvas');
   const W=c.width, H=c.height;
   const r=getEffectiveCropRatio(angle);
-  const bw=W*r.w, bh=H*r.h;
+  let bw=W*r.w, bh=H*r.h;
+  // Folding: force true square using height as the side
+  if(angle==='folding'){
+    const side=Math.min(H*r.h, W*0.92);
+    bw=side; bh=side;
+  }
   const bx=(W-bw)/2, by=(H-bh)/2;
   return {x:bx, y:by, w:bw, h:bh};
 }
@@ -480,6 +485,22 @@ function drawOverlay(){
     ctx.fillStyle='rgba(255,215,0,0.05)';
     ctx.fillRect(sq.x, sq.y, sq.w, sq.h);
   }
+
+  // Folding: center crosshair guide to help positioning
+  if(shot.angle==='folding'){
+    const cx=box.x+box.w/2, cy=box.y+box.h/2;
+    ctx.strokeStyle='rgba(255,215,0,0.55)';
+    ctx.lineWidth=1.5;
+    ctx.setLineDash([6,6]);
+    // Vertical center line
+    ctx.beginPath(); ctx.moveTo(cx, box.y); ctx.lineTo(cx, box.y+box.h); ctx.stroke();
+    // Horizontal center line
+    ctx.beginPath(); ctx.moveTo(box.x, cy); ctx.lineTo(box.x+box.w, cy); ctx.stroke();
+    ctx.setLineDash([]);
+    // Small center marker
+    ctx.strokeStyle='#FFD700'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(cx, cy, 8, 0, Math.PI*2); ctx.stroke();
+  }
 }
 
 function updateCameraUI(){
@@ -518,7 +539,12 @@ function showCropModal(){
     // Map crop box from screen to image coords
     const r=getEffectiveCropRatio(pendingShot.angle);
     const sW=window.innerWidth, sH=window.innerHeight;
-    const cropSW=sW*r.w, cropSH=sH*r.h;
+    let cropSW=sW*r.w, cropSH=sH*r.h;
+    // Folding: true square on screen
+    if(pendingShot.angle==='folding'){
+      const side=Math.min(sH*r.h, sW*0.92);
+      cropSW=side; cropSH=side;
+    }
     const cropSX=(sW-cropSW)/2, cropSY=(sH-cropSH)/2;
 
     // Video fill mapping (object-fit: cover)
@@ -536,6 +562,13 @@ function showCropModal(){
       const side=iW;
       iY=iY+(iH-side)/2;
       iH=side;
+    }
+    // Folding: guarantee square in image coords
+    if(pendingShot.angle==='folding'){
+      const side=Math.min(iW,iH);
+      iX=iX+(iW-side)/2;
+      iY=iY+(iH-side)/2;
+      iW=side; iH=side;
     }
 
     // Clamp to image bounds
